@@ -1,0 +1,14 @@
+{
+    "name": "deoris/integration",
+    "version": "1.0.0",
+    "description": "Shared event integration contracts for DEORIS Laravel modules.",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Deoris\\Integration\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.2"
+    }
+}
