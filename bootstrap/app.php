@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'module.access'    => EnsureModuleAccess::class,
             'two-factor.confirmed' => EnsureTwoFactorAuthenticationIsConfirmed::class,
             'module.signature' => \App\Http\Middleware\VerifyModuleSignature::class,
+            'module.portal_admin' => \App\Http\Middleware\VerifyModulePortalAdmin::class,
             'sso.secure'       => EnforceSsoSecurityHeaders::class,
         ]);
 
@@ -35,6 +36,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/*',
         ]);
 
+        // ── CRITICAL: Pin config values BEFORE any middleware reads them ────────
+        // Must be a global prepend so it runs before EncryptCookies/StartSession.
+        // In XAMPP, Apache reuses PHP worker processes across vhosts. A worker
+        // that previously served a module (sqlite sessions, no APP_KEY, redis
+        // broadcast) will have contaminated config. Force every critical value
+        // from .env so DEORIS always boots with its own correct configuration.
+        $middleware->prepend(ForceIframeSsoSessionCookies::class);
+
         // DEORIS iframe SSO cannot rely on Sanctum's conditional frontend
         // detector because some iframe/browser combinations omit Origin or
         // Referer. Start the API session unconditionally so /api/sso/check and
@@ -43,11 +52,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
-            ForceIframeSsoSessionCookies::class,
         ]);
 
         $middleware->appendToGroup('web', [
-            ForceIframeSsoSessionCookies::class,
             PortalCspMiddleware::class,
         ]);
     })

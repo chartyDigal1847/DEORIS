@@ -15,11 +15,20 @@ Route::domain('deoris.test')->group(function () {
 
     // ── Public ──────────────────────────────────────────────────────────────
 
+    // Landing page — guests see marketing; authenticated users stay in portal.
+    // Some module logos point at "/", so do not make that feel like logout.
     Route::get('/', function () {
         return auth()->check()
             ? redirect()->route('homepage')
-            : view('login_signup', ['mode' => 'login']);
-    });
+            : view('landing');
+    })->name('landing');
+
+    // Login redirect — authenticated users go straight to homepage.
+    Route::get('/login-redirect', function () {
+        return auth()->check()
+            ? redirect()->route('homepage')
+            : redirect()->route('login');
+    })->name('login.redirect');
 
     // ── Authenticated portal shell ───────────────────────────────────────────
 

@@ -36,6 +36,9 @@ return [
     'allowed_events' => [
         'StudentEnrolled',
         'TuitionPaid',
+        'PaymentCompleted',
+        'PaymentPaid',
+        'PaymentStatusChanged',
         'GradeReleased',
         'MedicalApproved',
         'LibraryPenaltyAdded',

@@ -35,16 +35,24 @@
   // ── Configuration (from parent or defaults) ──────────────────────────────
   var PORTAL_ORIGIN = "https://deoris.test";  // EXACT origin, not pattern
   var SSO_TIMEOUT_MS = Number(window.SSO_TIMEOUT_MS || 8000);
+  // Migration toggle:
+  // - "portal" (default): bridge exchanges token with DEORIS and emits user
+  // - "module": bridge emits token; module backend must exchange server-side
+  var SSO_MODE = (window.DEORIS_SSO_MODE === "module") ? "module" : "portal";
   
   // ── Runtime state (memory only, lost on reload) ───────────────────────────
   var requestId = String(Date.now()) + "-" + Math.random().toString(36).slice(2);
   var resolved = false;
   var timeoutId = null;
   var pendingToken = null;  // NO localStorage, NO sessionStorage
+  var ssoRequestAttempts = 0;
+  var MAX_SSO_REQUEST_ATTEMPTS = Number(window.SSO_MAX_ATTEMPTS || 3);
 
   // ── Public API (modules call these) ───────────────────────────────────────
   window.PORTAL_ORIGIN = PORTAL_ORIGIN;
+  window.SSO_TOKEN = null; // memory-only; used only in SSO_MODE="module"
   window.PORTAL_USER = null;
+  window.__DEORIS_SSO_MODE__ = SSO_MODE;
   window.__DEORIS_MODULE_READY_DETAIL__ = null;
   window.__DEORIS_MODULE_ERROR_DETAIL__ = null;
 
@@ -68,6 +76,7 @@
   // CRITICAL: Called on page unload to ensure token isn't leaked.
   function cleanupMemory() {
     pendingToken = null;
+    window.SSO_TOKEN = null;
     window.PORTAL_USER = null;
     window.__DEORIS_MODULE_READY_DETAIL__ = null;
   }
@@ -104,13 +113,13 @@
   function finishReady(user) {
     if (resolved) return;
     resolved = true;
-    pendingToken = null;
     window.PORTAL_USER = user;
     if (timeoutId) clearTimeout(timeoutId);
 
     window.__DEORIS_MODULE_READY_DETAIL__ = {
       success: true,
       user: user,
+      token: window.SSO_TOKEN,
       embedded: isEmbedded(),
       portalOrigin: PORTAL_ORIGIN,
     };
@@ -120,7 +129,7 @@
     emit("sso:ready", {
       success: true,
       user: user,
-      token: null,
+      token: window.SSO_TOKEN,
     });
   }
 
@@ -142,6 +151,36 @@
     }).catch(function () {
       // Best-effort cleanup during iframe navigation or portal tab close.
     });
+  }
+
+  function requestSsoToken(reason) {
+    if (resolved) return;
+
+    ssoRequestAttempts += 1;
+
+    if (ssoRequestAttempts > MAX_SSO_REQUEST_ATTEMPTS) {
+      finishError(reason || "sso_failed", "sso_retry_exhausted");
+      return;
+    }
+
+    window.parent.postMessage({
+      type: "REQUEST_SSO",
+      requestId: requestId,
+      attempt: ssoRequestAttempts,
+      reason: reason || null,
+    }, PORTAL_ORIGIN);
+  }
+
+  function isRetryableExchangeError(error) {
+    var message = String(error && error.message || "");
+    return message === "invalid_sso_token" ||
+      message === "sso_exchange_failed" ||
+      message === "sso_validation_failed" ||
+      message === "http_419" ||
+      message === "http_429" ||
+      message.indexOf("http_5") === 0 ||
+      message === "Failed to fetch" ||
+      message === "NetworkError when attempting to fetch resource.";
   }
 
   function exchangeToken(token) {
@@ -180,7 +219,7 @@
     if (!event.data || event.data.requestId !== requestId) return;
 
     if (event.data.type === "SSO_ERROR") {
-      finishError(event.data.error || "sso_failed", "portal_sso_error");
+      requestSsoToken(event.data.error || "portal_sso_error");
       return;
     }
 
@@ -193,10 +232,28 @@
 
     pendingToken = event.data.token;
 
+    if (SSO_MODE === "module") {
+      // Token-only mode: module backend will exchange the token server-side.
+      // Keep token in memory only long enough for boot JS to read it.
+      window.SSO_TOKEN = pendingToken;
+      pendingToken = null;
+      finishReady(null);
+      return;
+    }
+
+    // Portal mode: exchange with DEORIS immediately, then emit the verified user.
     exchangeToken(pendingToken)
-      .then(finishReady)
+      .then(function (user) {
+        pendingToken = null;
+        finishReady(user);
+      })
       .catch(function (error) {
         revokePendingToken();
+        if (isRetryableExchangeError(error)) {
+          requestSsoToken(error.message || "exchange_failed");
+          return;
+        }
+
         finishError(error.message || "exchange_failed", "exchange_failed");
       });
   });
@@ -212,7 +269,7 @@
   });
 
   if (!isEmbedded()) {
-    finishError("missing_iframe_context", "missing_iframe_context");
+    window.location.replace(PORTAL_ORIGIN + "/login-redirect");
     return;
   }
 
@@ -220,5 +277,5 @@
     finishError("sso_timeout", "sso_timeout");
   }, SSO_TIMEOUT_MS);
 
-  window.parent.postMessage({ type: "REQUEST_SSO", requestId: requestId }, PORTAL_ORIGIN);
+  requestSsoToken();
 }());

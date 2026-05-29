@@ -3,7 +3,7 @@
 namespace App\Services\Sso;
 
 use App\Models\User;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -18,7 +18,10 @@ use Throwable;
  * ║  • Type safety (tokenable must be User instance)                      ║
  * ║  • No token expiration (single-use is the security model)             ║
  * ║                                                                        ║
- * ║ Any changes to this class must be reviewed by a security architect.   ║
+ * ║ XAMPP NOTE: All token DB operations use a fresh PDO connection that   ║
+ * ║ bypasses Laravel's connection pool. This prevents cross-vhost DB      ║
+ * ║ contamination where Apache worker reuse causes the pool to point at   ║
+ * ║ a module database (e.g. deoris_taskflow) instead of deoris_identity_db║
  * ╚════════════════════════════════════════════════════════════════════════╝
  */
 class TokenValidator
@@ -26,79 +29,102 @@ class TokenValidator
     /**
      * Validate and consume an SSO token.
      *
-     * Validates that:
-     * 1. Token string is provided and not empty
-     * 2. Token exists in database
-     * 3. Token has 'sso' ability (not a generic or expired token)
-     * 4. Token's tokenable is a User instance
-     * 5. Token is destroyed immediately after validation (single-use)
-     *
-     * @param  string  $tokenString  The plain-text SSO token from request
+     * @param  string  $tokenString  The plain-text SSO token (id|hash format)
      * @return array{success: bool, user?: User, error?: string}
-     *
-     * @throws \Exception If assertion fails (critical security issue)
      */
     public static function validateAndConsume(string $tokenString): array
     {
         try {
-            // ── Assertion 1: Token string is not empty ──────────────────────────
             if (trim($tokenString) === '') {
                 return ['success' => false, 'error' => 'invalid_sso_token'];
             }
 
-            // ── Assertion 2: Token exists and has required ability ──────────────
-            $accessToken = PersonalAccessToken::findToken($tokenString);
-
-            if (!$accessToken) {
+            // Sanctum token format: "id|plaintext"
+            if (! str_contains($tokenString, '|')) {
                 return ['success' => false, 'error' => 'invalid_sso_token'];
             }
 
-            // Verify this token has the 'sso' ability (cannot use API tokens)
-            if (!$accessToken->can('sso')) {
-                $accessToken->delete();
+            [$id, $plaintext] = explode('|', $tokenString, 2);
+            $id = (int) $id;
+
+            if ($id <= 0 || $plaintext === '') {
                 return ['success' => false, 'error' => 'invalid_sso_token'];
             }
 
-            // ── Assertion 3: Token's user exists and is a User instance ────────
-            $tokenable = $accessToken->tokenable;
+            // ── Open a fresh PDO connection, bypassing Laravel's pool ────────────
+            // In XAMPP, Apache reuses PHP worker processes across vhosts. Laravel's
+            // connection pool may hold a PDO whose active database was changed by a
+            // prior request (e.g. USE deoris_taskflow). purge/reconnect reuses the
+            // same underlying socket. A brand-new PDO with an explicit DSN database
+            // is the only reliable way to guarantee we hit deoris_identity_db.
+            $pdo = static::freshPdo();
 
-            if (!$tokenable instanceof User) {
-                $accessToken->delete();
+            // Look up the token row
+            $stmt = $pdo->prepare(
+                'SELECT id, token, abilities, tokenable_type, tokenable_id
+                 FROM personal_access_tokens WHERE id = ? LIMIT 1'
+            );
+            $stmt->execute([$id]);
+            $row = $stmt->fetch(\PDO::FETCH_OBJ);
+
+            if (! $row) {
                 return ['success' => false, 'error' => 'invalid_sso_token'];
             }
 
-            // ── Assertion 4: User is in a valid auth state ────────────────────
-            if (!$tokenable->exists) {
-                $accessToken->delete();
+            // Verify hash
+            if (! hash_equals($row->token, hash('sha256', $plaintext))) {
                 return ['success' => false, 'error' => 'invalid_sso_token'];
             }
 
-            // ── Critical: Destroy token immediately (single-use enforcement) ────
-            // This is the critical line that prevents replay attacks. Once we return
-            // the user identity, the token MUST be deleted so it cannot be reused.
-            $user = $tokenable;
-            $accessToken->delete();
+            // Must have 'sso' ability
+            $abilities = json_decode($row->abilities ?? '[]', true) ?: [];
+            if (! in_array('sso', $abilities, true) && ! in_array('*', $abilities, true)) {
+                $pdo->prepare('DELETE FROM personal_access_tokens WHERE id = ?')->execute([$id]);
+                return ['success' => false, 'error' => 'invalid_sso_token'];
+            }
 
-            // ── Post-deletion assertion: Verify token is actually gone ──────────
-            // This is defensive programming to catch race conditions or bugs.
-            $reval = PersonalAccessToken::findToken($tokenString);
-            if ($reval !== null) {
-                // This should never happen. If it does, something is seriously wrong.
+            // Must belong to a User
+            if ($row->tokenable_type !== (new User())->getMorphClass()) {
+                $pdo->prepare('DELETE FROM personal_access_tokens WHERE id = ?')->execute([$id]);
+                return ['success' => false, 'error' => 'invalid_sso_token'];
+            }
+
+            // ── Fetch the user directly via the same fresh PDO ───────────────────
+            // User::find() uses the default 'mysql' connection which may also be
+            // contaminated by a prior cross-vhost request. Use the fresh PDO.
+            $uStmt = $pdo->prepare(
+                'SELECT * FROM users WHERE id = ? LIMIT 1'
+            );
+            $uStmt->execute([(int) $row->tokenable_id]);
+            $uRow = $uStmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (! $uRow) {
+                $pdo->prepare('DELETE FROM personal_access_tokens WHERE id = ?')->execute([$id]);
+                return ['success' => false, 'error' => 'invalid_sso_token'];
+            }
+
+            // Hydrate a User Eloquent model from the raw row (no DB query needed)
+            $user = (new User())->newFromBuilder($uRow);
+
+            // ── Single-use: delete immediately ───────────────────────────────────
+            $pdo->prepare('DELETE FROM personal_access_tokens WHERE id = ?')->execute([$id]);
+
+            // Post-deletion assertion
+            $chk = $pdo->prepare('SELECT COUNT(*) FROM personal_access_tokens WHERE id = ?');
+            $chk->execute([$id]);
+            if ((int) $chk->fetchColumn() > 0) {
                 throw new \RuntimeException(
-                    'CRITICAL: SSO token was not deleted after validation. ' .
-                    'This indicates a database issue or race condition. ' .
-                    'Token ID: ' . $reval->id
+                    'CRITICAL: SSO token was not deleted after validation. Token ID: ' . $id
                 );
             }
 
             return ['success' => true, 'user' => $user];
+
         } catch (Throwable $e) {
-            // Log the exception for debugging, but return generic error to client
-            \Illuminate\Support\Facades\Log::error('SSO token validation error', [
+            Log::error('SSO token validation error', [
                 'exception' => $e,
                 'token_first_8' => substr($tokenString, 0, 8) . '***',
             ]);
-
             return ['success' => false, 'error' => 'sso_validation_failed'];
         }
     }
@@ -106,47 +132,73 @@ class TokenValidator
     /**
      * Validate that a user can issue a new SSO token.
      *
-     * Enforces:
-     * 1. No multiple outstanding tokens per user (revoke-before-issue)
-     * 2. User is valid and active
-     *
-     * @param  User  $user  The user requesting a token
+     * @param  User  $user
      * @return array{success: bool, error?: string}
      */
     public static function validateUserCanIssue(User $user): array
     {
         try {
-            // Verify user exists and is not soft-deleted
-            if (!$user->exists) {
+            if (! $user->exists) {
                 return ['success' => false, 'error' => 'invalid_user'];
             }
 
-            // Check for existing SSO tokens (revoke-before-issue pattern)
             $existingTokens = $user->tokens()
                 ->where('name', 'sso-token')
                 ->count();
 
             if ($existingTokens > 0) {
-                // This can happen if a previous revoke failed to delete the token.
-                // Log this for investigation, but revoke all old tokens.
-                \Illuminate\Support\Facades\Log::warning(
-                    'Found stale SSO tokens during issue. Revoking.',
-                    ['user_id' => $user->id, 'stale_tokens' => $existingTokens]
-                );
-
-                $user->tokens()
-                    ->where('name', 'sso-token')
-                    ->delete();
+                Log::warning('Found stale SSO tokens during issue. Revoking.', [
+                    'user_id' => $user->id,
+                    'stale_tokens' => $existingTokens,
+                ]);
+                $user->tokens()->where('name', 'sso-token')->delete();
             }
 
             return ['success' => true];
+
         } catch (Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('SSO issue validation error', [
+            Log::error('SSO issue validation error', [
                 'exception' => $e,
                 'user_id' => $user->id ?? null,
             ]);
-
             return ['success' => false, 'error' => 'sso_validation_failed'];
         }
+    }
+
+    /**
+     * Open a brand-new PDO connection directly to deoris_identity_db.
+     *
+     * This bypasses Laravel's connection pool entirely, so no prior
+     * USE statement from another vhost can contaminate this connection.
+     *
+     * @throws \PDOException on connection failure
+     */
+    private static function freshPdo(): \PDO
+    {
+        $cfg = config('database.connections.deoris');
+
+        $dsn = sprintf(
+            'mysql:host=%s;port=%s;dbname=deoris_identity_db;charset=%s',
+            $cfg['host']    ?? '127.0.0.1',
+            $cfg['port']    ?? '3306',
+            $cfg['charset'] ?? 'utf8mb4'
+        );
+
+        $pdo = new \PDO(
+            $dsn,
+            $cfg['username'] ?? 'root',
+            $cfg['password'] ?? '',
+            [
+                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
+                \PDO::ATTR_EMULATE_PREPARES   => false,
+                \PDO::ATTR_PERSISTENT         => false,  // never reuse
+            ]
+        );
+
+        // Belt-and-suspenders: explicit USE even though it's in the DSN
+        $pdo->exec('USE `deoris_identity_db`');
+
+        return $pdo;
     }
 }

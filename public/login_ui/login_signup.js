@@ -1,79 +1,91 @@
-const tabButtons = document.querySelectorAll(".tab-btn");
-const loginFormElement = document.getElementById("loginForm");
-const signupFormElement = document.getElementById("signupForm");
-const authSwitchTextElement = document.getElementById("switchText");
-const signupPasswordInput = document.getElementById("signupPassword");
-const signupPasswordConfirmInput = document.getElementById("signupConfirm");
-const authPageElement = document.querySelector(".auth-page");
+/* ================================================================
+   DEORIS — Login / Sign-Up JS
+   ================================================================ */
+(function () {
+  'use strict';
 
-const AUTH_MODE = {
-  LOGIN: "login",
-  SIGNUP: "signup",
-};
+  const tabButtons         = document.querySelectorAll('.tab-btn');
+  const loginFormElement   = document.getElementById('loginForm');
+  const signupFormElement  = document.getElementById('signupForm');
+  const authSwitchText     = document.getElementById('switchText');
+  const authPage           = document.querySelector('.auth-page');
 
-const SWITCH_TEXT_CONTENT = {
-  [AUTH_MODE.LOGIN]: {
-    label: "Don't have an account?",
-    actionLabel: "Sign Up",
-    targetMode: AUTH_MODE.SIGNUP,
-  },
-  [AUTH_MODE.SIGNUP]: {
-    label: "Already have an account?",
-    actionLabel: "Login",
-    targetMode: AUTH_MODE.LOGIN,
-  },
-};
+  const AUTH_MODE = { LOGIN: 'login', SIGNUP: 'signup' };
 
-function updateAuthSwitchText(mode) {
-  const switchContent = SWITCH_TEXT_CONTENT[mode];
-  if (!switchContent) {
-    return;
+  const SWITCH_TEXT = {
+    login:  { label: "Don't have an account?", action: 'Sign Up',  target: 'signup' },
+    signup: { label: 'Already have an account?', action: 'Log In', target: 'login'  },
+  };
+
+  /* ── Tab / form switching ──────────────────────────────────── */
+  function setAuthMode(mode) {
+    if (!AUTH_MODE[mode.toUpperCase()]) return;
+
+    const isLogin = mode === AUTH_MODE.LOGIN;
+
+    tabButtons.forEach(btn =>
+      btn.classList.toggle('is-active', btn.dataset.tab === mode)
+    );
+
+    loginFormElement.classList.toggle('is-visible', isLogin);
+    signupFormElement.classList.toggle('is-visible', !isLogin);
+
+    const sw = SWITCH_TEXT[mode];
+    if (authSwitchText && sw) {
+      authSwitchText.innerHTML =
+        `${sw.label} <button type="button" class="switch-btn" data-switch="${sw.target}">${sw.action}</button>`;
+    }
   }
 
-  const { label, actionLabel, targetMode } = switchContent;
-  authSwitchTextElement.innerHTML = `${label} <button type="button" class="switch-btn" data-switch="${targetMode}">${actionLabel}</button>`;
-}
+  tabButtons.forEach(btn =>
+    btn.addEventListener('click', () => setAuthMode(btn.dataset.tab))
+  );
 
-function setAuthMode(mode) {
-  if (!Object.values(AUTH_MODE).includes(mode)) {
-    return;
-  }
-
-  const isLoginMode = mode === AUTH_MODE.LOGIN;
-
-  tabButtons.forEach((tabButtonElement) => {
-    tabButtonElement.classList.toggle("is-active", tabButtonElement.dataset.tab === mode);
+  authSwitchText && authSwitchText.addEventListener('click', e => {
+    const btn = e.target.closest('.switch-btn');
+    if (btn) setAuthMode(btn.dataset.switch);
   });
 
-  loginFormElement.classList.toggle("is-visible", isLoginMode);
-  signupFormElement.classList.toggle("is-visible", !isLoginMode);
-  updateAuthSwitchText(mode);
-}
-
-tabButtons.forEach((tabButtonElement) => {
-  tabButtonElement.addEventListener("click", () => {
-    setAuthMode(tabButtonElement.dataset.tab);
+  /* ── Password confirmation check ──────────────────────────── */
+  signupFormElement && signupFormElement.addEventListener('submit', e => {
+    const pw  = document.getElementById('signupPassword')?.value;
+    const cpw = document.getElementById('signupConfirm')?.value;
+    if (pw && cpw && pw !== cpw) {
+      e.preventDefault();
+      // Show inline error instead of alert
+      let err = signupFormElement.querySelector('.pw-mismatch-error');
+      if (!err) {
+        err = document.createElement('p');
+        err.className = 'field-help pw-mismatch-error';
+        err.style.color = '#DC2626';
+        err.style.marginTop = '-.5rem';
+        err.style.marginBottom = '.75rem';
+        const confirmField = document.getElementById('signupConfirm')?.closest('.field-group');
+        confirmField ? confirmField.appendChild(err) : signupFormElement.prepend(err);
+      }
+      err.textContent = 'Passwords do not match.';
+      document.getElementById('signupConfirm')?.focus();
+    }
   });
-});
 
-authSwitchTextElement.addEventListener("click", (event) => {
-  const switchButton = event.target.closest(".switch-btn");
-  if (!switchButton) {
-    return;
-  }
+  /* ── Password visibility toggles ──────────────────────────── */
+  document.querySelectorAll('.toggle-pw').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const wrap  = this.closest('.input-wrap');
+      const input = wrap?.querySelector('input');
+      if (!input) return;
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      const icon = this.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-eye',      !isHidden);
+        icon.classList.toggle('fa-eye-slash', isHidden);
+      }
+      this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+  });
 
-  const targetMode = switchButton.dataset.switch;
-  setAuthMode(targetMode);
-});
+  /* ── Init ──────────────────────────────────────────────────── */
+  setAuthMode(authPage?.dataset.initialAuthMode || AUTH_MODE.LOGIN);
 
-signupFormElement.addEventListener("submit", (event) => {
-  const passwordValue = signupPasswordInput.value;
-  const passwordConfirmationValue = signupPasswordConfirmInput.value;
-
-  if (passwordValue !== passwordConfirmationValue) {
-    event.preventDefault();
-    alert("Passwords do not match.");
-  }
-});
-
-setAuthMode(authPageElement?.dataset.initialAuthMode || AUTH_MODE.LOGIN);
+})();

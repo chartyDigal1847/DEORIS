@@ -149,7 +149,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        'deoris_identity_session'
+        '__Host-deoris_identity_session'
     ),
 
     /*
@@ -176,7 +176,7 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN', '.deoris.test'),
+    'domain' => env('SESSION_DOMAIN'),
 
     /*
     |--------------------------------------------------------------------------

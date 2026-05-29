@@ -122,7 +122,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 

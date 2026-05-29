@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SsoController;
+use App\Http\Controllers\Api\AdmissionOfficerController;
 use App\Http\Controllers\Api\AdminStatsController;
 use App\Http\Controllers\Api\ApiGatewayController;
 use App\Http\Controllers\Api\EventIngestController;
@@ -59,6 +60,18 @@ Route::prefix('v1')->group(function () {
         Route::post('/revoke', [SsoController::class, 'revokeToken'])
             ->name('revoke');
     });
+
+    // ── Module-signed identity admin (EntryEase admin UI proxies here) ───────
+    Route::prefix('module/admission-officers')
+        ->middleware(['module.signature', 'module.portal_admin'])
+        ->group(function (): void {
+            Route::get('/', [AdmissionOfficerController::class, 'index']);
+            Route::post('/', [AdmissionOfficerController::class, 'store']);
+            Route::get('/{admissionOfficer}', [AdmissionOfficerController::class, 'show']);
+            Route::put('/{admissionOfficer}', [AdmissionOfficerController::class, 'update']);
+            Route::patch('/{admissionOfficer}', [AdmissionOfficerController::class, 'update']);
+            Route::delete('/{admissionOfficer}', [AdmissionOfficerController::class, 'destroy']);
+        });
 
     // ── Central event hub ingest ─────────────────────────────────────────────
     // Accepts signed events from trusted module services via HTTP.

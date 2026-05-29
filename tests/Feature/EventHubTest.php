@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Jobs\ProcessEcosystemEvent;
+use App\Listeners\SyncUserPaymentStatus;
 use App\Models\EventLog;
 use App\Models\User;
 use App\Services\EventHub\TrustedModuleRegistry;
+use App\Services\UserPaymentSyncService;
 use Deoris\Integration\DTO\EcosystemEvent;
 use Deoris\Integration\Support\Signature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -114,5 +116,98 @@ class EventHubTest extends TestCase
 
         $this->assertTrue($registry->isTrusted('EnrollEase'));
         $this->assertFalse($registry->isTrusted('UnknownModule'));
+    }
+
+    public function test_enrolled_student_does_not_see_clearcheck_until_fully_cleared(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'admission_status' => User::ADMISSION_APPROVED,
+            'enrollment_status' => User::ENROLLMENT_ENROLLED,
+            'clearcheck_passed' => false,
+        ]);
+
+        $this->assertSame(['enrollease', 'assesspay'], $user->visibleModules());
+
+        $user->forceFill(['clearcheck_passed' => true]);
+
+        $this->assertContains('clearcheck', $user->visibleModules());
+    }
+
+    public function test_tuition_paid_fully_clears_approved_enrolled_student(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'admission_status' => User::ADMISSION_APPROVED,
+            'enrollment_status' => User::ENROLLMENT_ENROLLED,
+            'clearcheck_passed' => false,
+        ]);
+
+        $synced = app(UserPaymentSyncService::class)->markTuitionPaid([
+            'user_id' => $user->id,
+            'student_email' => $user->email,
+        ]);
+
+        $this->assertTrue($synced);
+        $this->assertTrue($user->fresh()->clearcheck_passed);
+    }
+
+    public function test_tuition_paid_does_not_clear_student_before_enrollment(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'admission_status' => User::ADMISSION_APPROVED,
+            'enrollment_status' => User::ENROLLMENT_NOT_ENROLLED,
+            'clearcheck_passed' => false,
+        ]);
+
+        $synced = app(UserPaymentSyncService::class)->markTuitionPaid([
+            'user_id' => $user->id,
+        ]);
+
+        $this->assertFalse($synced);
+        $this->assertFalse($user->fresh()->clearcheck_passed);
+    }
+
+    public function test_assesspay_completed_event_fully_clears_student(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'admission_status' => User::ADMISSION_APPROVED,
+            'enrollment_status' => User::ENROLLMENT_ENROLLED,
+            'clearcheck_passed' => false,
+        ]);
+
+        app(SyncUserPaymentStatus::class)->handle(new \App\Events\EcosystemEventReceived([
+            'name' => 'PaymentCompleted',
+            'source_module' => 'AssessPay',
+            'payload' => [
+                'user_id' => $user->id,
+                'status' => 'completed',
+            ],
+        ]));
+
+        $this->assertTrue($user->fresh()->clearcheck_passed);
+    }
+
+    public function test_assesspay_pending_event_does_not_clear_student(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'admission_status' => User::ADMISSION_APPROVED,
+            'enrollment_status' => User::ENROLLMENT_ENROLLED,
+            'clearcheck_passed' => false,
+        ]);
+
+        app(SyncUserPaymentStatus::class)->handle(new \App\Events\EcosystemEventReceived([
+            'name' => 'PaymentStatusChanged',
+            'source_module' => 'AssessPay',
+            'payload' => [
+                'user_id' => $user->id,
+                'status' => 'pending',
+            ],
+        ]));
+
+        $this->assertFalse($user->fresh()->clearcheck_passed);
     }
 }

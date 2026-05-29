@@ -3,13 +3,25 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\PersonalAccessToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\PersonalAccessToken;
 use Tests\TestCase;
 
 class SsoControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_authenticated_user_visiting_root_stays_in_portal(): void
+    {
+        $user = User::factory()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $this->actingAs($user, 'web');
+
+        $this->get('/')
+            ->assertRedirect(route('homepage', absolute: false));
+    }
 
     public function test_login_session_can_call_sso_check_without_origin_or_referer_headers(): void
     {

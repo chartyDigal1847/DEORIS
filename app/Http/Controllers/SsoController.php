@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\PersonalAccessToken;
 use App\Services\Sso\SsoAuditLog;
 use App\Services\Sso\TokenValidator;
-use App\Services\Sso\OriginValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Sanctum\PersonalAccessToken;
 use Throwable;
 
 /**

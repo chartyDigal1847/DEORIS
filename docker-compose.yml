@@ -1,0 +1,114 @@
+services:
+
+  # ─── Nginx ────────────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: deoris_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - app
+    networks:
+      - deoris_network
+
+  # ─── PHP-FPM (Laravel App) ────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deoris_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - deoris_network
+
+  # ─── MySQL ────────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: deoris_mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-deoris_identity_db}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:-deoris}
+    volumes:
+      - deoris_mysql_data:/var/lib/mysql
+    networks:
+      - deoris_network
+
+  # ─── Redis ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: deoris_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - deoris_redis_data:/data
+    networks:
+      - deoris_network
+
+  # ─── Queue Worker ─────────────────────────────────────────────────────────
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deoris_queue
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: php artisan queue:work redis --queue=events,notifications,default --tries=3 --timeout=90 --sleep=3
+    depends_on:
+      - app
+      - redis
+    networks:
+      - deoris_network
+
+  # ─── Laravel Reverb (WebSockets) ──────────────────────────────────────────
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deoris_reverb
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: php artisan reverb:start --host=0.0.0.0 --port=8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - app
+      - redis
+    networks:
+      - deoris_network
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  deoris_mysql_data:
+    driver: local
+  deoris_redis_data:
+    driver: local
+
+# ─── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  deoris_network:
+    driver: bridge

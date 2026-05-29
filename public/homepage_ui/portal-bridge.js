@@ -45,9 +45,30 @@
   ]);
 
   var outstandingTokens = new Map();
+  var tokenIssueQueue = Promise.resolve();
+  var MAX_ISSUE_ATTEMPTS = 5;
 
   function isAllowedOrigin(origin) {
     return ALLOWED_ORIGINS.indexOf(origin) !== -1;
+  }
+
+  function delay(ms) {
+    return new Promise(function (resolve) {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function isRetryableSsoError(error) {
+    var message = String(error && error.message || "");
+    return message === "sso_token_issue_failed" ||
+      message === "sso_validation_failed" ||
+      message === "unauthenticated" ||
+      message === "http_401" ||
+      message === "http_419" ||
+      message === "http_429" ||
+      message.indexOf("http_5") === 0 ||
+      message === "Failed to fetch" ||
+      message === "NetworkError when attempting to fetch resource.";
   }
 
   function jsonFetch(url, options) {
@@ -67,7 +88,7 @@
     });
   }
 
-  function issueToken() {
+  function issueTokenOnce() {
     return jsonFetch("/api/v1/sso/token", { method: "GET" }).then(function (body) {
       if (typeof body.token !== "string" || body.token.length === 0) {
         throw new Error("missing_sso_token");
@@ -75,6 +96,34 @@
 
       return body.token;
     });
+  }
+
+  function issueTokenWithRetry(attempt) {
+    attempt = attempt || 1;
+
+    return issueTokenOnce().catch(function (error) {
+      if (attempt >= MAX_ISSUE_ATTEMPTS || !isRetryableSsoError(error)) {
+        throw error;
+      }
+
+      return delay(250 * attempt).then(function () {
+        return issueTokenWithRetry(attempt + 1);
+      });
+    });
+  }
+
+  function issueToken() {
+    var nextIssue = tokenIssueQueue
+      .catch(function () {
+        // A previous caller failed; keep the queue usable for the next iframe.
+      })
+      .then(function () {
+        return issueTokenWithRetry(1);
+      });
+
+    tokenIssueQueue = nextIssue.catch(function () {});
+
+    return nextIssue;
   }
 
   function revokeToken(token) {

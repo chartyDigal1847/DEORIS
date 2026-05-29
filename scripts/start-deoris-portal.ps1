@@ -50,7 +50,7 @@ $MODULES = @(
     [PSCustomObject]@{ Name="LibrarySys";    Path="C:\xampp\htdocs\LibrarySys";      Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
     [PSCustomObject]@{ Name="TaskFlow";      Path="C:\xampp\htdocs\taskflow";        Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
     [PSCustomObject]@{ Name="VoteSys";       Path="C:\xampp\htdocs\VoteSys";         Queue="redis";    Events=$false; Reverb=$false; Color="Green"   },
-    [PSCustomObject]@{ Name="CareerConnect"; Path="C:\xampp\htdocs\carrerConnect";   Queue="database"; Events=$false; Reverb=$false; Color="Green"   }
+    [PSCustomObject]@{ Name="CareerConnect"; Path="C:\xampp\htdocs\carrerConnect";   Queue="database"; Events=$false; Reverb=$true;  Color="Green"   }
 )
 
 # Fix DEORIS path from script location
@@ -259,6 +259,21 @@ foreach ($m in $MODULES) {
                 "queue:work database --queue=default --tries=3 --backoff=10 --timeout=60" `
                 $m.Color
             $count++; Start-Sleep -Milliseconds 400
+
+            # Start Reverb if this module needs it
+            if ($m.Reverb) {
+                # Read port from .env
+                $envFile = Join-Path $m.Path ".env"
+                $reverbPort = 8083
+                if (Test-Path $envFile) {
+                    $portLine = Select-String -Path $envFile -Pattern "^REVERB_SERVER_PORT=" | Select-Object -First 1
+                    if ($portLine) { $reverbPort = ($portLine.Line -split "=")[1].Trim() }
+                }
+                Start-Worker "$($m.Name) Reverb (WebSockets)" $m.Path `
+                    "reverb:start --host=0.0.0.0 --port=$reverbPort" `
+                    $m.Color
+                $count++; Start-Sleep -Milliseconds 400
+            }
         }
     }
 }
@@ -296,6 +311,7 @@ Write-Host "  DATABASE LibrarySys Queue Worker   default" -ForegroundColor Green
 Write-Host "  DATABASE TaskFlow Queue Worker     default" -ForegroundColor Green
 Write-Host "  REDIS    VoteSys Queue Worker      default" -ForegroundColor Green
 Write-Host "  DATABASE CareerConnect Queue Worker default" -ForegroundColor Green
+Write-Host "  DATABASE CareerConnect Reverb          WebSocket real-time (port 8083)" -ForegroundColor Green
 Write-Host ""
 Write-Host ("  To stop: close the {0} terminal windows." -f $count) -ForegroundColor DarkGray
 Write-Host ""

@@ -16,6 +16,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement("
             ALTER TABLE users
             MODIFY COLUMN admission_status
@@ -28,6 +32,10 @@ return new class extends Migration
     {
         // First reset any under_review rows back to pending so the column shrink doesn't fail
         DB::statement("UPDATE users SET admission_status = 'pending' WHERE admission_status = 'under_review'");
+
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return;
+        }
 
         DB::statement("
             ALTER TABLE users

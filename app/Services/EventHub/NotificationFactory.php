@@ -146,6 +146,12 @@ final class NotificationFactory
                 'action_url' => '/assesspay',
                 'type' => 'finance',
             ],
+            'PaymentCompleted', 'PaymentPaid', 'PaymentStatusChanged' => [
+                'title' => 'Payment status updated',
+                'body' => 'AssessPay marked the payment as '.($payload['status'] ?? $payload['payment_status'] ?? 'completed').'.',
+                'action_url' => '/assesspay',
+                'type' => 'finance',
+            ],
             'GradeReleased' => [
                 'title' => 'Grade released',
                 'body' => 'A grade was released for '.($payload['course'] ?? 'your course').'.',

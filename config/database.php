@@ -32,6 +32,39 @@ return [
 
     'connections' => [
 
+        /*
+        |----------------------------------------------------------------------
+        | DEORIS identity connection — always points to deoris_identity_db.
+        |
+        | This named connection is used by Sanctum's PersonalAccessToken model
+        | to prevent XAMPP connection-reuse from bleeding a module's DB_DATABASE
+        | into DEORIS's token lookups (see: assespaydb.personal_access_tokens bug).
+        |----------------------------------------------------------------------
+        */
+        'deoris' => [
+            'driver'    => 'mysql',
+            'url'       => env('DB_URL'),
+            'host'      => env('DB_HOST', '127.0.0.1'),
+            'port'      => env('DB_PORT', '3306'),
+            'database'  => 'deoris_identity_db',   // hardcoded — never inherits env bleed
+            'username'  => env('DB_USERNAME', 'root'),
+            'password'  => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset'   => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix'    => '',
+            'prefix_indexes' => true,
+            'strict'    => true,
+            'engine'    => null,
+            // Force USE deoris_identity_db on every new PDO connection.
+            // This prevents XAMPP worker-thread reuse from bleeding a module's
+            // DB_DATABASE (e.g. deoris_taskflow) into Sanctum token lookups.
+            'options'   => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'USE `deoris_identity_db`',
+            ]) : [PDO::MYSQL_ATTR_INIT_COMMAND => 'USE `deoris_identity_db`'],
+        ],
+
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),

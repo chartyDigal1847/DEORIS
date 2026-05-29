@@ -205,7 +205,11 @@ class UserEnrollmentSyncService
     private function findUser(?string $email, mixed $userId): ?User
     {
         if ($userId) {
-            return User::find($userId);
+            $user = User::find($userId);
+
+            if ($user) {
+                return $user;
+            }
         }
 
         if ($email) {

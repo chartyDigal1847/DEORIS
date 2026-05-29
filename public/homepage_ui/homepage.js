@@ -18,10 +18,10 @@
  *   Nothing else in this file touches display or hidden.
  *
  * Iframe contract:
- *   - iframe starts with [hidden] in HTML (never visible without a src)
- *   - showPanel(moduleFrame) is called BEFORE setting src
- *   - src is only set when moduleUrl is non-empty and passes validation
- *   - On dashboard: src is cleared so no stale document stays loaded
+ *   - iframes start with [hidden] and are shown only after module activation
+ *   - one warm iframe is kept per visited module, so switching back is instant
+ *   - src is only set once per module unless a full page reload happens
+ *   - dashboard hides module iframes instead of clearing their src
  */
 
 (() => {
@@ -36,6 +36,9 @@
   const profileDropdown    = document.getElementById("profileDropdown");
   const dashboardHome      = document.getElementById("dashboardHome");
   const moduleFrame        = document.getElementById("moduleFrame");
+  const moduleFrameHost    = moduleFrame?.parentElement || null;
+  const moduleFrames       = new Map();
+  const warmedOrigins      = new Set();
   const navItems           = Array.from(document.querySelectorAll(".navItem"));
   // Notification elements — owned by portal-notifications.js, referenced
   // here only to close the panel when other UI opens.
@@ -105,6 +108,79 @@
     const u = new URL(url);
     u.searchParams.set("embedded", "1");
     return u.toString();
+  }
+
+  function warmModuleOrigin(url) {
+    if (!isValidModuleUrl(url)) return;
+
+    const origin = new URL(url).origin;
+    if (warmedOrigins.has(origin)) return;
+    warmedOrigins.add(origin);
+
+    ["dns-prefetch", "preconnect"].forEach((rel) => {
+      const link = document.createElement("link");
+      link.rel = rel;
+      link.href = origin;
+      if (rel === "preconnect") link.crossOrigin = "anonymous";
+      document.head.appendChild(link);
+    });
+  }
+
+  function createModuleFrame(moduleName) {
+    const frame =
+      !moduleFrame.dataset.module && !moduleFrame.getAttribute("src")
+        ? moduleFrame
+        : document.createElement("iframe");
+
+    frame.className = "moduleFrame";
+    frame.dataset.module = moduleName;
+    frame.title = `DEORIS ${moduleName} module`;
+    frame.hidden = true;
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    frame.allow = "clipboard-read; clipboard-write";
+    frame.setAttribute("data-warm-frame", "true");
+    frame.dataset.loaded = "false";
+    frame.addEventListener("load", () => {
+      if (frame.src && frame.src !== "about:blank") {
+        frame.dataset.loaded = "true";
+      }
+    });
+
+    if (frame !== moduleFrame) {
+      moduleFrameHost.appendChild(frame);
+    }
+
+    moduleFrames.set(moduleName, frame);
+    return frame;
+  }
+
+  function moduleFrameFor(moduleName, moduleUrl) {
+    const src = buildModuleUrl(moduleUrl);
+    const frame = moduleFrames.get(moduleName) || createModuleFrame(moduleName);
+
+    if (frame.dataset.src !== src) {
+      frame.dataset.src = src;
+      frame.dataset.loaded = "false";
+      frame.src = src;
+    }
+
+    return frame;
+  }
+
+  function hideModuleFrames(except = null) {
+    moduleFrames.forEach((frame) => {
+      if (frame !== except) hidePanel(frame);
+    });
+  }
+
+  function abortUnfinishedBackgroundFrames(except = null) {
+    moduleFrames.forEach((frame) => {
+      if (frame === except || frame.dataset.loaded === "true") return;
+      if (!frame.src || frame.src === "about:blank") return;
+
+      frame.src = "about:blank";
+      frame.dataset.src = "";
+    });
   }
 
   // ── Sidebar ──────────────────────────────────────────────────────────────
@@ -244,17 +320,16 @@
     // Panel switching
     if (isDashboard) {
       showPanel(dashboardHome);
-      hidePanel(moduleFrame);
-      if (moduleFrame) moduleFrame.removeAttribute("src");
+      hideModuleFrames();
       console.log("[portal] Dashboard activated.");
     } else {
+      const frame = moduleFrameFor(moduleName, moduleUrl);
       hidePanel(dashboardHome);
-      showPanel(moduleFrame);
-      if (moduleFrame) {
-        const src = buildModuleUrl(moduleUrl);
-        moduleFrame.src = src;
-        console.log(`[portal] Module "${moduleName}" → ${src}`);
-      }
+      hideModuleFrames(frame);
+      abortUnfinishedBackgroundFrames(frame);
+      showPanel(frame);
+      warmModuleOrigin(moduleUrl);
+      console.log(`[portal] Module "${moduleName}" → ${frame.dataset.src}`);
     }
 
     // History
@@ -274,8 +349,7 @@
     } else {
       navItems.forEach((n) => n.classList.remove("is-active"));
       showPanel(dashboardHome);
-      hidePanel(moduleFrame);
-      if (moduleFrame) moduleFrame.removeAttribute("src");
+      hideModuleFrames();
     }
   }
 
@@ -291,6 +365,51 @@
       closeMobileSidebar();
       activateModule(item);
     });
+
+    item.addEventListener("pointerenter", () => {
+      if (item.dataset.module !== "dashboard") warmModuleOrigin(item.dataset.moduleUrl || "");
+    });
+
+    item.addEventListener("focus", () => {
+      if (item.dataset.module !== "dashboard") warmModuleOrigin(item.dataset.moduleUrl || "");
+    });
+  });
+
+  // ── Dashboard home-area module links (homeHero__btn, homeModuleCard, etc.) ─
+  // These links live inside .dashboardHome and carry data-module + data-module-url.
+  // Intercept them so they open the iframe instead of doing a full page reload.
+  dashboardHome?.addEventListener("click", (e) => {
+    const link = e.target.closest("a[data-module-url]");
+    if (!link || link.dataset.nativeLink === "true") return;
+    if (!dashboardHome || !moduleFrame) return;
+
+    const moduleName = link.dataset.module || "";
+    const moduleUrl  = link.dataset.moduleUrl || "";
+
+    // Skip if no module key or no valid URL
+    if (!moduleName || moduleName === "dashboard") return;
+    if (!isValidModuleUrl(moduleUrl)) return;
+
+    e.preventDefault();
+    closeProfile();
+    closeNotifications();
+    closeMobileSidebar();
+
+    // Find the matching nav item and activate it (syncs nav highlight + iframe)
+    const navMatch = navItems.find((n) => n.dataset.module === moduleName);
+    if (navMatch) {
+      activateModule(navMatch);
+    } else {
+      // Module exists but has no nav item (edge case) — activate directly
+      navItems.forEach((n) => n.classList.remove("is-active"));
+      hidePanel(dashboardHome);
+      const frame = moduleFrameFor(moduleName, moduleUrl);
+      hideModuleFrames(frame);
+      abortUnfinishedBackgroundFrames(frame);
+      showPanel(frame);
+      warmModuleOrigin(moduleUrl);
+      window.history.pushState({ module: moduleName }, "", `/${moduleName}`);
+    }
   });
 
   // ── Back / forward navigation ─────────────────────────────────────────────
@@ -313,5 +432,90 @@
     null;
 
   if (initialItem) activateModule(initialItem, false);
+
+  // ── Admin homepage live data ──────────────────────────────────────────────
+  // Only runs when the admin stat elements are present in the DOM.
+
+  function portalHeaders() {
+    return {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || "",
+    };
+  }
+
+  async function initAdminHomepage() {
+    // Guard — only run when admin stat elements exist
+    if (!document.getElementById("hp-stat-students")) return;
+
+    async function loadStats() {
+      try {
+        const r = await fetch("/api/v1/admin/stats", {
+          headers: portalHeaders(),
+          credentials: "include",
+        });
+        if (!r.ok) return;
+        const { data: d } = await r.json();
+        if (!d) return;
+        const set = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = v ?? "—";
+        };
+        set("hp-total-students",    d.total_students);
+        set("hp-total-instructors", d.total_instructors);
+        set("hp-total-users",       d.total_users);
+        set("hp-stat-students",     d.total_students);
+        set("hp-stat-enrolled",     (d.enrolled_students ?? "—") + " enrolled");
+        set("hp-stat-instructors",  d.total_instructors);
+        set("hp-stat-pending",      d.pending_admissions);
+        set("hp-stat-cleared",      d.cleared_students);
+        set("hp-stat-events-today", d.events_today);
+        set("hp-stat-events-failed",(d.events_failed ?? "—") + " failed");
+        const trend = document.getElementById("hp-events-trend");
+        if (trend && d.events_failed > 0) trend.classList.add("homeStat__trend--warn");
+      } catch (_) { /* network error — silently ignore */ }
+    }
+
+    async function loadActivity() {
+      try {
+        const r = await fetch("/portal/event-logs?per_page=5", {
+          headers: portalHeaders(),
+          credentials: "include",
+        });
+        if (!r.ok) return;
+        const { data: rows } = await r.json();
+        const ul = document.getElementById("hp-admin-activity");
+        if (!ul || !rows?.length) return;
+        const statusColor = {
+          received: "#3b82f6", processing: "#f59e0b",
+          processed: "#16a34a", failed: "#ef4444",
+        };
+        ul.innerHTML = rows.map((row) => `
+          <li class="homeActivity__item">
+            <span class="homeActivity__dot" style="background:${statusColor[row.status] || "#9ca3af"}"></span>
+            <div class="homeActivity__body">
+              <strong>${escapeHtml(row.event_name || "Event")}</strong>
+              <span>${escapeHtml(row.source_module || "")} &middot; ${escapeHtml(row.received_at || "")}</span>
+            </div>
+            <span class="homeActivity__badge homeActivity__badge--${escapeHtml(row.status)}">${escapeHtml(row.status)}</span>
+          </li>`).join("");
+      } catch (_) { /* silently ignore */ }
+    }
+
+    loadStats();
+    loadActivity();
+    setInterval(loadStats, 60_000);
+
+    // Also refresh when a real-time event comes in via Reverb
+    if (window.Echo) {
+      window.Echo.private("event-monitoring")
+        .listen(".event.processed", () => {
+          loadStats();
+          loadActivity();
+        });
+    }
+  }
+
+  initAdminHomepage();
 
 })();
