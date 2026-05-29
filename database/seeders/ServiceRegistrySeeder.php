@@ -101,7 +101,15 @@ class ServiceRegistrySeeder extends Seeder
                 'url'              => env('CAREERCONNECT_URL', 'https://careerconnect.deoris.test'),
                 'api_version'      => 'v1',
                 'status'           => ServiceRegistry::STATUS_ACTIVE,
-                'allowed_roles'    => [User::ROLE_ADMIN, User::ROLE_INSTRUCTOR],
+                'allowed_roles'    => [
+                    User::ROLE_ADMIN,
+                    User::ROLE_STUDENT,
+                    User::ROLE_INSTRUCTOR,
+                    User::ROLE_CASHIER,
+                    User::ROLE_LIBRARIAN,
+                    User::ROLE_ADMISSION_OFFICER,
+                    User::ROLE_CAREER_OFFICER,
+                ],
                 'health_check_url' => env('CAREERCONNECT_URL', 'https://careerconnect.deoris.test').'/up',
                 'environment_config' => [
                     'event_secret_env' => 'CAREERCONNECT_EVENT_SECRET',
@@ -127,7 +135,7 @@ class ServiceRegistrySeeder extends Seeder
                 'url'              => env('VOTESYS_URL', 'https://votesys.deoris.test'),
                 'api_version'      => 'v1',
                 'status'           => ServiceRegistry::STATUS_ACTIVE,
-                'allowed_roles'    => [User::ROLE_ADMIN, User::ROLE_STUDENT, User::ROLE_ELECTION_OFFICER, User::ROLE_CANDIDATE],
+                'allowed_roles'    => [User::ROLE_ADMIN, User::ROLE_STUDENT, User::ROLE_ELECTION_OFFICER],
                 'health_check_url' => env('VOTESYS_URL', 'https://votesys.deoris.test').'/up',
                 'environment_config' => [
                     'event_secret_env' => 'VOTESYS_EVENT_SECRET',

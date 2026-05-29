@@ -20,9 +20,9 @@ return new class extends Migration
         'cashier',
         'librarian',
         'admission_officer',
+        'career_officer',
         'nurse',
         'election_officer',
-        'candidate',
     ];
 
     public function up(): void

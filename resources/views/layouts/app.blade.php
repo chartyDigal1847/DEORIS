@@ -18,7 +18,9 @@
         <meta name="deoris-user-id" content="{{ $user?->id }}">
         <meta name="deoris-reverb-enabled" content="{{ config('broadcasting.default') === 'reverb' ? 'true' : 'false' }}">
 
-        <title>{{ config('app.name', 'DEORIS') }}</title>
+        <title>{{ config('app.name', 'DEORIS Portal') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <link rel="stylesheet" href="{{ asset('homepage_ui/homepage.css') }}">
@@ -32,10 +34,10 @@
             <aside class="sidebar" id="sidebar" aria-label="Account navigation">
                 <a class="brand" href="{{ route('homepage') }}" aria-label="DEORIS Home">
                     <div class="brand__logo">
-                        <img src="{{ asset('login_ui/assets/logo.png') }}" alt="DEORIS Logo" class="brand__logo-img" />
+                        <img src="{{ asset('login_ui/assets/logo.png') }}" alt="DEORIS Portal logo" class="brand__logo-img" />
                     </div>
                     <div class="brand__copy">
-                        <div class="brand__title">DEORIS</div>
+                        <div class="brand__title">DEORIS Portal</div>
                         <div class="brand__subtitle">Deor &amp; Dune Academe Inc.<br />Information System</div>
                     </div>
                 </a>

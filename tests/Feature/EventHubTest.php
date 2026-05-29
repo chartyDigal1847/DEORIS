@@ -118,7 +118,7 @@ class EventHubTest extends TestCase
         $this->assertFalse($registry->isTrusted('UnknownModule'));
     }
 
-    public function test_enrolled_student_does_not_see_clearcheck_until_fully_cleared(): void
+    public function test_enrolled_student_unlocks_full_modules_after_assesspay_pipeline(): void
     {
         $user = User::factory()->create([
             'role' => User::ROLE_STUDENT,
@@ -128,10 +128,14 @@ class EventHubTest extends TestCase
         ]);
 
         $this->assertSame(['enrollease', 'assesspay'], $user->visibleModules());
+        $this->assertNotContains('careerconnect', $user->visibleModules());
 
         $user->forceFill(['clearcheck_passed' => true]);
 
-        $this->assertContains('clearcheck', $user->visibleModules());
+        $modules = $user->visibleModules();
+        $this->assertContains('clearcheck', $modules);
+        $this->assertContains('careerconnect', $modules);
+        $this->assertContains('gradetrack', $modules);
     }
 
     public function test_tuition_paid_fully_clears_approved_enrolled_student(): void

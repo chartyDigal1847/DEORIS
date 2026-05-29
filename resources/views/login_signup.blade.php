@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DEORIS — Sign In</title>
+  <title>Sign In | DEORIS Portal</title>
+  <link rel="icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6" />
+  <link rel="shortcut icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -36,10 +38,10 @@
       <!-- Brand -->
       <header class="brand">
         <div class="brand__badge">
-          <img src="{{ asset('login_ui/assets/logo.png') }}" alt="DEORIS logo" />
+          <img src="{{ asset('login_ui/assets/logo.png') }}" alt="DEORIS Portal logo" />
         </div>
-        <h1>DEORIS</h1>
-        <p>Deor &amp; Dune Academe Inc.</p>
+        <h1>DEORIS Portal</h1>
+        <p>Deor &amp; Dune Academe Inc. Information System</p>
       </header>
 
       <!-- Tabs -->
@@ -78,7 +80,7 @@
             <i class="fas fa-envelope"></i> Email Address
           </label>
           <input id="loginEmail" name="email" type="email"
-            placeholder="name@example.com"
+            placeholder="Enter your email address"
             value="{{ old('email') }}"
             autocomplete="username" required autofocus />
         </div>
@@ -89,7 +91,7 @@
           </label>
           <div class="input-wrap">
             <input id="loginPassword" name="password" type="password"
-              placeholder="Enter your password"
+              placeholder="Enter your account password"
               autocomplete="current-password" required />
             <button type="button" class="toggle-pw" aria-label="Toggle password visibility" tabindex="-1">
               <i class="fas fa-eye"></i>
@@ -121,7 +123,7 @@
             <i class="fas fa-user"></i> Full Name
           </label>
           <input id="signupName" name="name" type="text"
-            placeholder="Your full name"
+            placeholder="Enter your full name"
             value="{{ old('name') }}"
             autocomplete="name" required />
         </div>
@@ -131,7 +133,7 @@
             <i class="fas fa-envelope"></i> Email Address
           </label>
           <input id="signupEmail" name="email" type="email"
-            placeholder="name@example.com"
+            placeholder="Enter your email address"
             value="{{ old('email') }}"
             autocomplete="username" required />
         </div>
@@ -142,7 +144,7 @@
           </label>
           <div class="input-wrap">
             <input id="signupPassword" name="password" type="password"
-              placeholder="Min. 12 characters"
+              placeholder="Create a secure password"
               autocomplete="new-password" minlength="12" required />
             <button type="button" class="toggle-pw" aria-label="Toggle password visibility" tabindex="-1">
               <i class="fas fa-eye"></i>
@@ -157,7 +159,7 @@
           </label>
           <div class="input-wrap">
             <input id="signupConfirm" name="password_confirmation" type="password"
-              placeholder="Repeat your password"
+              placeholder="Confirm your password"
               autocomplete="new-password" minlength="12" required />
             <button type="button" class="toggle-pw" aria-label="Toggle password visibility" tabindex="-1">
               <i class="fas fa-eye"></i>

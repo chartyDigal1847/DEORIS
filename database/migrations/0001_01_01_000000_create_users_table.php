@@ -24,9 +24,9 @@ return new class extends Migration
                     'cashier',
                     'librarian',
                     'admission_officer',
+                    'career_officer',
                     'nurse',
                     'election_officer',
-                    'candidate',
                 ])->default('student')->index();
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();

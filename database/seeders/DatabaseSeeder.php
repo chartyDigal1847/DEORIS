@@ -106,6 +106,14 @@ class DatabaseSeeder extends Seeder
                 'role'              => User::ROLE_ADMISSION_OFFICER,
                 'email_verified_at' => now(),
             ],
+            // ── Career Officer ─────────────────────────────────────────────
+            [
+                'name'              => 'Career Officer',
+                'email'             => 'career@example.com',
+                'password'          => Hash::make('Career@Password1'),
+                'role'              => User::ROLE_CAREER_OFFICER,
+                'email_verified_at' => now(),
+            ],
             // ── Nurse / Health Officer ─────────────────────────────────────
             [
                 'name'              => 'Nurse',
@@ -120,14 +128,6 @@ class DatabaseSeeder extends Seeder
                 'email'             => 'election@example.com',
                 'password'          => Hash::make('Election@Password1'),
                 'role'              => User::ROLE_ELECTION_OFFICER,
-                'email_verified_at' => now(),
-            ],
-            // ── Candidate (VoteSys specific) ───────────────────────────────
-            [
-                'name'              => 'Candidate',
-                'email'             => 'candidate@example.com',
-                'password'          => Hash::make('Candidate@Password1'),
-                'role'              => User::ROLE_CANDIDATE,
                 'email_verified_at' => now(),
             ],
         ];

@@ -20,9 +20,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public const ROLE_CASHIER          = 'cashier';
     public const ROLE_LIBRARIAN        = 'librarian';
     public const ROLE_ADMISSION_OFFICER = 'admission_officer';
+    public const ROLE_CAREER_OFFICER   = 'career_officer';
     public const ROLE_NURSE            = 'nurse';
     public const ROLE_ELECTION_OFFICER = 'election_officer';
-    public const ROLE_CANDIDATE        = 'candidate';
 
     use HasApiTokens;
 
@@ -116,9 +116,9 @@ class User extends Authenticatable implements MustVerifyEmail
             self::ROLE_CASHIER,
             self::ROLE_LIBRARIAN,
             self::ROLE_ADMISSION_OFFICER,
+            self::ROLE_CAREER_OFFICER,
             self::ROLE_NURSE,
             self::ROLE_ELECTION_OFFICER,
-            self::ROLE_CANDIDATE,
         ];
     }
 
@@ -130,19 +130,25 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isCashier(): bool          { return $this->role === self::ROLE_CASHIER; }
     public function isLibrarian(): bool        { return $this->role === self::ROLE_LIBRARIAN; }
     public function isAdmissionOfficer(): bool { return $this->role === self::ROLE_ADMISSION_OFFICER; }
+    public function isCareerOfficer(): bool    { return $this->role === self::ROLE_CAREER_OFFICER; }
     public function isNurse(): bool            { return $this->role === self::ROLE_NURSE; }
     public function isElectionOfficer(): bool  { return $this->role === self::ROLE_ELECTION_OFFICER; }
-    public function isCandidate(): bool        { return $this->role === self::ROLE_CANDIDATE; }
 
     /**
-     * CareerConnect is accessible to all faculty roles — not students.
+     * CareerConnect is accessible to staff and students who finished the
+     * EntryEase → EnrollEase → AssessPay onboarding pipeline.
      */
     public function canAccessCareerConnect(): bool
     {
+        if ($this->isStudent()) {
+            return $this->studentHasCompletedOnboardingPipeline();
+        }
+
         return $this->hasRole(
             self::ROLE_ADMIN,
             self::ROLE_INSTRUCTOR,
             self::ROLE_ADMISSION_OFFICER,
+            self::ROLE_CAREER_OFFICER,
             self::ROLE_LIBRARIAN,
             self::ROLE_CASHIER,
         );
@@ -155,9 +161,8 @@ class User extends Authenticatable implements MustVerifyEmail
      *   Step 1 (pending)   → profile, entryease only
      *   Step 3 (approved)  → + enrollease (entryease hidden)
      *   Step 4 (enrolled)  → + enrollease, assesspay
-     *   Step 5 (cleared)   → + gradetrack, assesspay, librarysys, taskflow,
-     *                          meditrack, votesys (always — no election gate)
-     *   CareerConnect      → NEVER for students
+     *   Step 5 (pipeline complete) → all student modules including CareerConnect
+     *       (after EntryEase approval, EnrollEase enrollment, AssessPay tuition)
      *
      * Staff roles get their relevant modules immediately.
      *
@@ -186,17 +191,17 @@ class User extends Authenticatable implements MustVerifyEmail
             // ── Librarian: library + career ──────────────────────────────────
             self::ROLE_LIBRARIAN => ['librarysys', 'careerconnect'],
 
-            // ── Admission Officer: admissions + enrollment + career ───────────
+            // ── Admission Officer: admissions + enrollment + career comms ────
             self::ROLE_ADMISSION_OFFICER => ['entryease', 'enrollease', 'clearcheck', 'careerconnect'],
+
+            // ── Career Officer: career services and opportunities ────────────
+            self::ROLE_CAREER_OFFICER => ['careerconnect'],
 
             // ── Nurse: medical records only ──────────────────────────────────
             self::ROLE_NURSE => ['meditrack'],
 
             // ── Election Officer: VoteSys + ClearCheck ───────────────────────
             self::ROLE_ELECTION_OFFICER => ['votesys', 'clearcheck'],
-
-            // ── Candidate: VoteSys only (when election active) ───────────────
-            self::ROLE_CANDIDATE => $electionActive ? ['votesys'] : [],
 
             // ── Student: progressive unlock ──────────────────────────────────
             self::ROLE_STUDENT => $this->studentVisibleModules($electionActive),
@@ -206,14 +211,13 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Resolves the progressive module list for a student based on their
-     * admission_status, enrollment_status, and clearcheck_passed flag.
+     * Resolves the progressive module list for a student based on the
+     * EntryEase → EnrollEase → AssessPay pipeline.
      *
-     * Step 1 — registered, admission pending  → EntryEase only (take entrance exam)
-     * Step 2 — same as step 1 (exam submitted, still pending review) → EntryEase
-     * Step 3 — admission approved, not yet enrolled → EnrollEase only
-     * Step 4 — enrolled, tuition not yet paid → EnrollEase + AssessPay
-     * Step 5 — approved + enrolled + paid → full access including ClearCheck and VoteSys
+     * Step 1 — admission pending / under review → EntryEase only
+     * Step 2 — admission approved, not enrolled → EnrollEase only
+     * Step 3 — enrolled, tuition not yet paid (AssessPay) → EnrollEase + AssessPay
+     * Step 4 — approved + enrolled + tuition paid → all student modules (incl. CareerConnect)
      *
      * @return array<int, string>
      */
@@ -235,23 +239,32 @@ class User extends Authenticatable implements MustVerifyEmail
             return ['enrollease'];
         }
 
-        // Step 4 — enrolled but not fully cleared yet
-        if (! $this->clearcheck_passed) {
+        // Step 3 — enrolled, still need to complete AssessPay
+        if (! $this->studentHasCompletedOnboardingPipeline()) {
             return ['enrollease', 'assesspay'];
         }
 
-        // Step 5 — fully cleared: unlock all student modules
-        // VoteSys is always accessible to fully cleared students — no election
-        // active flag required. Cleared students are registered voters and
-        // should always be able to access the election system.
+        // Step 4 — onboarding pipeline complete: unlock all student modules
         $modules = [
             'enrollease', 'gradetrack', 'assesspay',
             'librarysys', 'taskflow', 'meditrack', 'clearcheck',
-            'votesys',
+            'votesys', 'careerconnect',
         ];
 
-        // CareerConnect is NEVER shown to students.
         return $modules;
+    }
+
+    /**
+     * True when the student has completed EntryEase (approved), EnrollEase
+     * (enrolled), and AssessPay (tuition paid). The portal stores the paid step
+     * on clearcheck_passed — that flag is set by AssessPay events, not by the
+     * ClearCheck module.
+     */
+    private function studentHasCompletedOnboardingPipeline(): bool
+    {
+        return $this->admission_status === self::ADMISSION_APPROVED
+            && $this->enrollment_status === self::ENROLLMENT_ENROLLED
+            && (bool) $this->clearcheck_passed;
     }
 
     /**

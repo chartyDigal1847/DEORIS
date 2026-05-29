@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="DEORIS — Deor & Dune Academe Inc. Information System. The all-in-one academic management platform built for modern schools.">
+  <meta name="description" content="DEORIS Portal is the Deor & Dune Academe Inc. Information System for secure, role-based school operations.">
   <meta name="theme-color" content="#7C3041">
-  <title>DEORIS — Deor &amp; Dune Academe Inc.</title>
+  <title>DEORIS Portal | Deor &amp; Dune Academe Inc.</title>
+  <link rel="icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6">
+  <link rel="shortcut icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +24,7 @@
   <div id="pageLoader" class="page-loader" aria-busy="true" aria-live="polite">
     <div class="loader-inner">
       <img src="{{ asset('landing/assets/images/logo.png') }}" alt="" width="72" height="72" class="loader-logo" decoding="async">
-      <p class="loader-text">DEORIS</p>
+      <p class="loader-text">DEORIS Portal</p>
       <div class="loader-bar"><div class="loader-bar-fill"></div></div>
     </div>
   </div>
@@ -30,10 +32,10 @@
   <!-- NAVBAR -->
   <header class="navbar" id="navbar" role="banner">
     <div class="nav-inner">
-      <a href="#home" class="nav-brand" aria-label="DEORIS home">
-        <img src="{{ asset('landing/assets/images/logo.png') }}" alt="DEORIS" class="nav-logo" width="40" height="40" decoding="async">
+      <a href="#home" class="nav-brand" aria-label="DEORIS Portal home">
+        <img src="{{ asset('landing/assets/images/logo.png') }}" alt="DEORIS Portal" class="nav-logo" width="40" height="40" decoding="async">
         <div class="nav-brand-text">
-          <span class="nav-brand-name">DEORIS</span>
+          <span class="nav-brand-name">DEORIS Portal</span>
           <span class="nav-brand-sub">Deor &amp; Dune Academe Inc.</span>
         </div>
       </a>
@@ -81,11 +83,11 @@
         </div>
 
         <h1 class="hero-title" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
-          DEORIS for<br><em>School Operations</em>
+          DEORIS Portal for<br><em>School Operations</em>
         </h1>
 
         <p class="hero-desc" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
-          DEORIS is the integrated information system for Deor &amp; Dune Academe Inc., bringing together enrollment, academic records, grading, payments, library, health, voting, and administrative workflows in one secure, role-based environment.
+          DEORIS Portal is the integrated information system for Deor &amp; Dune Academe Inc., bringing together enrollment, academic records, grading, payments, library, health, voting, and administrative workflows in one secure, role-based environment.
         </p>
 
         <div class="hero-cta-row" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">
@@ -403,10 +405,10 @@
         <div class="footer-grid">
           <div class="footer-col footer-brand-col">
             <div class="footer-brand">
-              <img src="{{ asset('landing/assets/images/logo.png') }}" alt="DEORIS" width="44" height="44" decoding="async">
-              <span>DEORIS</span>
+              <img src="{{ asset('landing/assets/images/logo.png') }}" alt="DEORIS Portal" width="44" height="44" decoding="async">
+              <span>DEORIS Portal</span>
             </div>
-            <p>Deor &amp; Dune Academe Inc. Information System — empowering education through elegant technology since 2025.</p>
+            <p>Deor &amp; Dune Academe Inc. Information System for secure, role-based academic operations.</p>
             <address class="footer-address">
               <i class="fas fa-map-marker-alt"></i>
               123 Academic Avenue, Education City, Philippines
@@ -443,7 +445,7 @@
     </div>
     <div class="footer-bottom">
       <div class="container">
-        <p>&copy; {{ date('Y') }} <strong>Deor &amp; Dune Academe Inc.</strong> All rights reserved. &nbsp;|&nbsp; DEORIS Information System</p>
+        <p>&copy; {{ date('Y') }} <strong>Deor &amp; Dune Academe Inc.</strong> All rights reserved. &nbsp;|&nbsp; DEORIS Portal</p>
       </div>
     </div>
   </footer>

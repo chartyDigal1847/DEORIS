@@ -24,7 +24,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <meta name="deoris-user-id" content="{{ $user?->id }}" />
     <meta name="deoris-reverb-enabled" content="{{ config('broadcasting.default') === 'reverb' ? 'true' : 'false' }}" />
-    <title>DEORIS Homepage</title>
+    <title>Deoris Portal</title>
+    <link rel="icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6" />
+    <link rel="shortcut icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6" />
     @php
       $moduleOrigins = collect($visibleModules)
         ->map(fn ($moduleKey) => $moduleLinks[$moduleKey]['url'] ?? null)
@@ -51,10 +53,10 @@
       <aside class="sidebar" id="sidebar" aria-label="Main navigation">
         <a class="brand" href="{{ route('homepage') }}" aria-label="DEORIS Home">
           <div class="brand__logo">
-            <img src="{{ asset('login_ui/assets/logo.png') }}" alt="DEORIS Logo" class="brand__logo-img" />
+            <img src="{{ asset('login_ui/assets/logo.png') }}" alt="DEORIS Portal logo" class="brand__logo-img" />
           </div>
           <div class="brand__copy">
-            <div class="brand__title">DEORIS</div>
+            <div class="brand__title">DEORIS Portal</div>
             <div class="brand__subtitle">Deor &amp; Dune Academe Inc.<br />Information System</div>
           </div>
         </a>
@@ -74,9 +76,9 @@
             'cashier'          => 'Cashier',
             'librarian'        => 'Librarian',
             'admission_officer'=> 'Admission Officer',
+            'career_officer'   => 'Career Officer',
             'nurse'            => 'Nurse / Health Officer',
             'election_officer' => 'Election Officer',
-            'candidate'        => 'Candidate',
             default            => 'User',
           };
           $allModuleNav = [
@@ -806,6 +808,70 @@
 
 
           {{-- ═══════════════════════════════════════════════════════════════
+               CAREER OFFICER DASHBOARD
+          ════════════════════════════════════════════════════════════════ --}}
+          @elseif ($role === 'career_officer')
+
+            <div class="homeHero homeHero--career">
+              <div class="homeHero__orb homeHero__orb--1" aria-hidden="true"></div>
+              <div class="homeHero__orb homeHero__orb--2" aria-hidden="true"></div>
+              <div class="homeHero__inner">
+                <div class="homeHero__left">
+                  <div class="homeHero__eyebrow">
+                    <span class="homeHero__dot" style="background:#7c2d12"></span>
+                    Career Officer &nbsp;·&nbsp; Career Services
+                  </div>
+                  <h1 class="homeHero__title">{{ $greeting }}, {{ $firstName }}.</h1>
+                  <p class="homeHero__sub">Manage jobs, internships, student applications, and career coordination through CareerConnect.</p>
+                  <div class="homeHero__meta">
+                    <span class="homeHero__metaItem">
+                      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                      {{ $dayLabel }}
+                    </span>
+                    <span class="homeHero__metaItem">
+                      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M16 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21c0-4 3-7 7-7"/></svg>
+                      Career services active
+                    </span>
+                  </div>
+                </div>
+                <div class="homeHero__right">
+                  <div class="homeHero__actions">
+                    <a href="{{ url('/careerconnect') }}" class="homeHero__btn homeHero__btn--primary" data-module="careerconnect" data-module-url="{{ $moduleLinks['careerconnect']['url'] ?? '' }}">
+                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M16 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M6 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21c0-4 3-7 7-7"/><path d="M22 21c0-4-3-7-7-7"/></svg>
+                      Open CareerConnect
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            @php $mc = $moduleColors['careerconnect']; @endphp
+            <div class="homeSingleModule">
+              <a href="{{ url('/careerconnect') }}" class="homeSingleModule__card" data-module="careerconnect" data-module-url="{{ $moduleLinks['careerconnect']['url'] ?? '' }}" style="--mc-accent:{{ $mc['accent'] }};--mc-icon-bg:{{ $mc['icon_bg'] }}">
+                <div class="homeSingleModule__icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28">{!! $moduleIcons['careerconnect'] !!}</svg>
+                </div>
+                <div class="homeSingleModule__body">
+                  <strong>CareerConnect</strong>
+                  <p>Create and manage opportunities, review student applications, publish career announcements, and monitor recruitment reports.</p>
+                </div>
+                <div class="homeSingleModule__cta">
+                  Open CareerConnect
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+              </a>
+              <div class="homeSingleModule__tips">
+                <h4>Career Services Reminders</h4>
+                <ul>
+                  <li><svg viewBox="0 0 24 24" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg> Review pending applications before forwarding them to partners</li>
+                  <li><svg viewBox="0 0 24 24" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg> Keep internship and job postings current</li>
+                  <li><svg viewBox="0 0 24 24" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg> Use reports to track placement activity</li>
+                </ul>
+              </div>
+            </div>
+
+
+          {{-- ═══════════════════════════════════════════════════════════════
                NURSE DASHBOARD
           ════════════════════════════════════════════════════════════════ --}}
           @elseif ($role === 'nurse')
@@ -983,98 +1049,6 @@
                 </ul>
               </div>
             </div>
-
-
-          {{-- ═══════════════════════════════════════════════════════════════
-               CANDIDATE DASHBOARD
-          ════════════════════════════════════════════════════════════════ --}}
-          @elseif ($role === 'candidate')
-
-            <div class="homeHero homeHero--candidate">
-              <div class="homeHero__orb homeHero__orb--1" aria-hidden="true"></div>
-              <div class="homeHero__inner">
-                <div class="homeHero__left">
-                  <div class="homeHero__eyebrow">
-                    @if ($electionActive)
-                      <span class="homeHero__dot homeHero__dot--live"></span>
-                      Candidate &nbsp;·&nbsp; Election Active
-                    @else
-                      <span class="homeHero__dot" style="background:#9ca3af"></span>
-                      Candidate &nbsp;·&nbsp; School Election
-                    @endif
-                  </div>
-                  <h1 class="homeHero__title">{{ $greeting }}, {{ $firstName }}.</h1>
-                  <p class="homeHero__sub">
-                    @if ($electionActive)
-                      The election is live. Access VoteSys to view your campaign profile and live results.
-                    @else
-                      Your candidate portal is ready. VoteSys will become accessible once the Election Officer starts the election.
-                    @endif
-                  </p>
-                  <div class="homeHero__meta">
-                    <span class="homeHero__metaItem">
-                      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                      {{ $dayLabel }}
-                    </span>
-                    <span class="homeHero__metaItem" style="color:{{ $electionActive ? '#4ade80' : '#9ca3af' }}">
-                      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
-                      Election {{ $electionActive ? 'Active' : 'Inactive' }}
-                    </span>
-                  </div>
-                </div>
-                <div class="homeHero__right">
-                  <div class="homeHero__electionStatus {{ $electionActive ? 'homeHero__electionStatus--active' : 'homeHero__electionStatus--inactive' }}">
-                    <div class="homeHero__electionStatus-dot"></div>
-                    <strong>{{ $electionActive ? 'Voting Open' : 'Awaiting Election' }}</strong>
-                    <span>{{ $electionActive ? 'Ballots are being cast now' : 'Election Officer will start the election' }}</span>
-                  </div>
-                  @if ($electionActive)
-                    <div class="homeHero__actions" style="margin-top:12px">
-                      <a href="{{ url('/votesys') }}" class="homeHero__btn homeHero__btn--primary" data-module="votesys" data-module-url="{{ $moduleLinks['votesys']['url'] ?? '' }}">
-                        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
-                        Open VoteSys
-                      </a>
-                    </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-
-            @if ($electionActive)
-              @php $mc = $moduleColors['votesys']; @endphp
-              <div class="homeSingleModule">
-                <a href="{{ url('/votesys') }}" class="homeSingleModule__card" data-module="votesys" data-module-url="{{ $moduleLinks['votesys']['url'] ?? '' }}" style="--mc-accent:{{ $mc['accent'] }};--mc-icon-bg:{{ $mc['icon_bg'] }}">
-                  <div class="homeSingleModule__icon">
-                    <svg viewBox="0 0 24 24" width="28" height="28">{!! $moduleIcons['votesys'] !!}</svg>
-                  </div>
-                  <div class="homeSingleModule__body">
-                    <strong>VoteSys — Election Live</strong>
-                    <p>The election is currently active. View your candidate profile, track live vote counts, and see real-time results as ballots are cast.</p>
-                  </div>
-                  <div class="homeSingleModule__cta">
-                    Open VoteSys
-                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                  </div>
-                </a>
-                <div class="homeSingleModule__tips">
-                  <h4>Candidate Tips</h4>
-                  <ul>
-                    <li><svg viewBox="0 0 24 24" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg> Check VoteSys regularly for live vote updates</li>
-                    <li><svg viewBox="0 0 24 24" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg> Results are published by the Election Officer after voting closes</li>
-                    <li><svg viewBox="0 0 24 24" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg> Contact the Election Officer for any concerns</li>
-                  </ul>
-                </div>
-              </div>
-            @else
-              <div class="homeEmptyState">
-                <div class="homeEmptyState__icon">
-                  <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
-                </div>
-                <h3>No Active Election</h3>
-                <p>VoteSys will become available once the Election Officer starts the election. You'll be notified when voting opens.</p>
-              </div>
-            @endif
-
 
           {{-- ═══════════════════════════════════════════════════════════════
                STUDENT DASHBOARD — progressive unlock

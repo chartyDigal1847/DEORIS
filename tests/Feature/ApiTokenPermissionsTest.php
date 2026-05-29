@@ -38,8 +38,13 @@ class ApiTokenPermissionsTest extends TestCase
             ]])
             ->call('updateApiToken');
 
-        $this->assertTrue($user->fresh()->tokens->first()->can('delete'));
-        $this->assertFalse($user->fresh()->tokens->first()->can('read'));
-        $this->assertFalse($user->fresh()->tokens->first()->can('missing-permission'));
+        $updatedToken = $user->fresh()
+            ->tokens
+            ->firstWhere('id', $token->id);
+
+        $this->assertNotNull($updatedToken);
+        $this->assertTrue($updatedToken->can('delete'));
+        $this->assertFalse($updatedToken->can('read'));
+        $this->assertFalse($updatedToken->can('missing-permission'));
     }
 }
