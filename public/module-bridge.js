@@ -47,7 +47,8 @@
       }
     }
 
-    return "https://deoris.test";
+    // Final fallback: use current script host origin instead of hardcoded domain.
+    return window.location.origin;
   }
 
   var PORTAL_ORIGIN = resolvePortalOrigin();  // EXACT origin, not pattern

@@ -3,6 +3,7 @@
 | File | Use |
 |------|-----|
 | `start-deoris-portal.ps1` | **Main launcher** — starts all 4 background services |
+| `smoke-check-deoris.ps1` | Production smoke checks for portal and module hosts |
 
 ## What it starts
 

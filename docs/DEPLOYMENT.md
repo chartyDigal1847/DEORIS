@@ -1,5 +1,8 @@
 # DEORIS Portal — Deployment Guide
 
+For Docker production on Contabo with `deoris.net`, use:
+- [DEPLOYMENT-DOCKER-DEORIS-NET.md](./DEPLOYMENT-DOCKER-DEORIS-NET.md)
+
 ## Development (XAMPP / Windows)
 
 See [SETUP.md](../SETUP.md) for the full local development setup.
