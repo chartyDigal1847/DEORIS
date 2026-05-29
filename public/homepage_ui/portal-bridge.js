@@ -31,18 +31,24 @@
   // ── Explicit whitelist of allowed module origins ──────────────────────────
   // NO WILDCARDS. Each origin must be listed explicitly.
   // This prevents hostile subdomains from participating in SSO.
-  var ALLOWED_ORIGINS = Object.freeze([
-    "https://entryease.deoris.test",
-    "https://enrollease.deoris.test",
-    "https://gradetrack.deoris.test",
-    "https://meditrack.deoris.test",
-    "https://librarysys.deoris.test",
-    "https://taskflow.deoris.test",
-    "https://careerconnect.deoris.test",
-    "https://assesspay.deoris.test",
-    "https://votesys.deoris.test",
-    "https://clearcheck.deoris.test",
-  ]);
+  function collectAllowedOrigins() {
+    var navItems = Array.prototype.slice.call(document.querySelectorAll("[data-module-url]"));
+    var origins = navItems
+      .map(function (item) { return item.getAttribute("data-module-url") || ""; })
+      .filter(Boolean)
+      .map(function (moduleUrl) {
+        try {
+          return new URL(moduleUrl).origin;
+        } catch (_) {
+          return null;
+        }
+      })
+      .filter(Boolean);
+
+    return Object.freeze(Array.from(new Set(origins)));
+  }
+
+  var ALLOWED_ORIGINS = collectAllowedOrigins();
 
   var outstandingTokens = new Map();
   var tokenIssueQueue = Promise.resolve();
@@ -62,8 +68,6 @@
     var message = String(error && error.message || "");
     return message === "sso_token_issue_failed" ||
       message === "sso_validation_failed" ||
-      message === "unauthenticated" ||
-      message === "http_401" ||
       message === "http_419" ||
       message === "http_429" ||
       message.indexOf("http_5") === 0 ||
@@ -147,6 +151,10 @@
   }
 
   function postError(targetWindow, targetOrigin, error, requestId) {
+    if (!targetWindow || typeof targetWindow.postMessage !== "function") {
+      return;
+    }
+
     targetWindow.postMessage({
       type: "SSO_ERROR",
       success: false,
@@ -157,7 +165,13 @@
 
   window.addEventListener("message", function (event) {
     if (!isAllowedOrigin(event.origin)) return;
-    if (!event.source || !event.data || event.data.type !== "REQUEST_SSO") return;
+    if (!event.source || !event.data) return;
+
+    if (event.data.type === "MODULE_SSO_ERROR") {
+      return;
+    }
+
+    if (event.data.type !== "REQUEST_SSO") return;
 
     var requestId = typeof event.data.requestId === "string" ? event.data.requestId : null;
 

@@ -56,6 +56,10 @@ class PortalCspMiddleware
             [config('services.auth.url')]
         )));
 
+        if ((bool) config('app.debug', false)) {
+            $connectSrc .= ' http://127.0.0.1:7481';
+        }
+
         $csp = implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",

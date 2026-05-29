@@ -9,10 +9,11 @@ use App\Services\ModuleRegistry;
 use Illuminate\Support\Facades\Route;
 
 // ===========================================================================
-// PORTAL DOMAIN — deoris.test
+// PORTAL DOMAIN — derived from APP_URL (e.g., deoris.test / deoris.net)
 // ===========================================================================
-Route::domain('deoris.test')->group(function () {
+$portalHost = parse_url((string) config('app.url'), PHP_URL_HOST);
 
+$portalRoutes = static function (): void {
     // ── Public ──────────────────────────────────────────────────────────────
 
     // Landing page — guests see marketing; authenticated users stay in portal.
@@ -78,14 +79,21 @@ Route::domain('deoris.test')->group(function () {
                 Route::get('/' . $module['legacy'], fn () => redirect("/{$path}"));
             }
         });
-});
+};
+
+if (is_string($portalHost) && $portalHost !== '') {
+    Route::domain($portalHost)->group($portalRoutes);
+} else {
+    // Fallback for unusual APP_URL values so routes still boot.
+    Route::group([], $portalRoutes);
+}
 
 // ===========================================================================
-// MODULE SUBDOMAINS — {module}.deoris.test
+// MODULE SUBDOMAINS — {module}.<portal-domain>
 //
 // Each module is a completely separate Laravel application. This portal only
 // serves:
-//   - https://deoris.test/module-bridge.js
-//   - https://deoris.test/api/sso/token
-//   - https://deoris.test/api/sso/check
+//   - https://<portal-domain>/module-bridge.js
+//   - https://<portal-domain>/api/sso/token
+//   - https://<portal-domain>/api/sso/check
 // ===========================================================================

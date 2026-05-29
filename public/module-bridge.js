@@ -18,7 +18,7 @@
  * ║  5. Auto-cleanup on page unload                                       ║
  * ║                                                                        ║
  * ║ Required delivery:                                                    ║
- * ║   <script src="https://deoris.test/module-bridge.js"></script>       ║
+ * ║   <script src="https://<portal-domain>/module-bridge.js"></script>   ║
  * ║                                                                        ║
  * ║ The portal serves this from /public/module-bridge.js and updates      ║
  * ║ it centrally, ensuring all modules always get the latest SSO logic.  ║
@@ -32,8 +32,25 @@
   if (window.__DEORIS_MODULE_BRIDGE_RUNNING__) return;
   window.__DEORIS_MODULE_BRIDGE_RUNNING__ = true;
 
-  // ── Configuration (from parent or defaults) ──────────────────────────────
-  var PORTAL_ORIGIN = "https://deoris.test";  // EXACT origin, not pattern
+  // ── Configuration (from parent, script URL, or fallback) ─────────────────
+  function resolvePortalOrigin() {
+    if (typeof window.DEORIS_PORTAL_ORIGIN === "string" && window.DEORIS_PORTAL_ORIGIN) {
+      return window.DEORIS_PORTAL_ORIGIN;
+    }
+
+    var currentScript = document.currentScript;
+    if (currentScript && currentScript.src) {
+      try {
+        return new URL(currentScript.src).origin;
+      } catch (_) {
+        // Fall through to default.
+      }
+    }
+
+    return "https://deoris.test";
+  }
+
+  var PORTAL_ORIGIN = resolvePortalOrigin();  // EXACT origin, not pattern
   var SSO_TIMEOUT_MS = Number(window.SSO_TIMEOUT_MS || 8000);
   // Migration toggle:
   // - "portal" (default): bridge exchanges token with DEORIS and emits user
@@ -86,6 +103,17 @@
     resolved = true;
     pendingToken = null;
     if (timeoutId) clearTimeout(timeoutId);
+
+    try {
+      window.parent.postMessage({
+        type: "MODULE_SSO_ERROR",
+        requestId: requestId,
+        error: error,
+        code: code || "sso_failed",
+      }, PORTAL_ORIGIN);
+    } catch (_) {
+      // Best effort telemetry channel for the portal parent.
+    }
 
     emit("module:error", {
       success: false,
@@ -219,7 +247,12 @@
     if (!event.data || event.data.requestId !== requestId) return;
 
     if (event.data.type === "SSO_ERROR") {
-      requestSsoToken(event.data.error || "portal_sso_error");
+      var errorCode = event.data.error || "portal_sso_error";
+      if (errorCode === "unauthenticated" || errorCode === "http_401" || errorCode === "email_unverified") {
+        finishError(errorCode, "portal_session_lost");
+        return;
+      }
+      requestSsoToken(errorCode);
       return;
     }
 

@@ -81,18 +81,21 @@
 
   // ── URL validation ───────────────────────────────────────────────────────
 
-  const ALLOWED_MODULE_HOSTS = [
-    "entryease.deoris.test",
-    "enrollease.deoris.test",
-    "gradetrack.deoris.test",
-    "meditrack.deoris.test",
-    "librarysys.deoris.test",
-    "taskflow.deoris.test",
-    "careerconnect.deoris.test",
-    "assesspay.deoris.test",
-    "votesys.deoris.test",
-    "clearcheck.deoris.test",
-  ];
+  const ALLOWED_MODULE_HOSTS = Array.from(
+    new Set(
+      navItems
+        .map((item) => item.dataset.moduleUrl || "")
+        .filter(Boolean)
+        .map((moduleUrl) => {
+          try {
+            return new URL(moduleUrl).hostname;
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean)
+    )
+  );
 
   function isValidModuleUrl(url) {
     if (!url) return false;
@@ -143,6 +146,9 @@
     frame.addEventListener("load", () => {
       if (frame.src && frame.src !== "about:blank") {
         frame.dataset.loaded = "true";
+        const loadMs = frame.dataset.requestedAt
+          ? Date.now() - Number(frame.dataset.requestedAt)
+          : null;
       }
     });
 
@@ -161,10 +167,27 @@
     if (frame.dataset.src !== src) {
       frame.dataset.src = src;
       frame.dataset.loaded = "false";
+      frame.dataset.requestedAt = String(Date.now());
       frame.src = src;
+    } else {
     }
 
     return frame;
+  }
+
+  function restartModuleFrame(moduleName, moduleUrl) {
+    const frame = moduleFrames.get(moduleName);
+    if (!frame) return false;
+
+    const baseSrc = buildModuleUrl(moduleUrl);
+    const reloadSrc = new URL(baseSrc);
+    reloadSrc.searchParams.set("_reload", String(Date.now()));
+
+    frame.dataset.src = reloadSrc.toString();
+    frame.dataset.loaded = "false";
+    frame.dataset.requestedAt = String(Date.now());
+    frame.src = frame.dataset.src;
+    return true;
   }
 
   function hideModuleFrames(except = null) {
@@ -360,9 +383,17 @@
       // Let native links (profile, API tokens) navigate normally
       if (item.dataset.nativeLink === "true" || !dashboardHome || !moduleFrame) return;
       e.preventDefault();
+      const activeBeforeClick = item.classList.contains("is-active");
       closeProfile();
       closeNotifications();
       closeMobileSidebar();
+      if (activeBeforeClick && item.dataset.module !== "dashboard") {
+        const didRestart = restartModuleFrame(
+          item.dataset.module || "",
+          item.dataset.moduleUrl || ""
+        );
+        if (didRestart) return;
+      }
       activateModule(item);
     });
 

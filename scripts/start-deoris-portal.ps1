@@ -43,13 +43,13 @@ $ErrorActionPreference = "Stop"
 $MODULES = @(
     [PSCustomObject]@{ Name="DEORIS";        Path="";                                Queue="redis";    Events=$true;  Reverb=$true;  Color="Cyan"    },
     [PSCustomObject]@{ Name="EntryEase";     Path="C:\xampp\htdocs\entryEase";       Queue="database"; Events=$true;  Reverb=$true;  Color="Magenta" },
-    [PSCustomObject]@{ Name="EnrollEase";    Path="C:\xampp\htdocs\EnrollEase";      Queue="redis";    Events=$false; Reverb=$false; Color="Yellow"  },
+    [PSCustomObject]@{ Name="EnrollEase";    Path="C:\xampp\htdocs\enrollEase";      Queue="redis";    Events=$false; Reverb=$false; Color="Yellow"  },
     [PSCustomObject]@{ Name="GradeTrack";    Path="C:\xampp\htdocs\gradeTrack";      Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
-    [PSCustomObject]@{ Name="ClearCheck";    Path="C:\xampp\htdocs\ClearCheck";      Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
-    [PSCustomObject]@{ Name="MediTrack";     Path="C:\xampp\htdocs\MediTrack";       Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
-    [PSCustomObject]@{ Name="LibrarySys";    Path="C:\xampp\htdocs\LibrarySys";      Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
+    [PSCustomObject]@{ Name="ClearCheck";    Path="C:\xampp\htdocs\clearCheck";      Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
+    [PSCustomObject]@{ Name="MediTrack";     Path="C:\xampp\htdocs\mediTrack";       Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
+    [PSCustomObject]@{ Name="LibrarySys";    Path="C:\xampp\htdocs\librarySys";      Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
     [PSCustomObject]@{ Name="TaskFlow";      Path="C:\xampp\htdocs\taskflow";        Queue="database"; Events=$false; Reverb=$false; Color="Green"   },
-    [PSCustomObject]@{ Name="VoteSys";       Path="C:\xampp\htdocs\VoteSys";         Queue="redis";    Events=$false; Reverb=$false; Color="Green"   },
+    [PSCustomObject]@{ Name="VoteSys";       Path="C:\xampp\htdocs\voteSys";         Queue="redis";    Events=$false; Reverb=$false; Color="Green"   },
     [PSCustomObject]@{ Name="CareerConnect"; Path="C:\xampp\htdocs\carrerConnect";   Queue="database"; Events=$false; Reverb=$true;  Color="Green"   }
 )
 
@@ -173,6 +173,7 @@ foreach ($m in $MODULES) {
     Write-Host ("  {0} {1,-14} {2}  {3}{4}" -f $tag, $m.Name, $icon, $m.Path, $extra) -ForegroundColor $color
 }
 
+
 # ── Migrations ───────────────────────────────────────────────
 Write-Host ""
 Write-Host "  Migrations" -ForegroundColor Cyan
@@ -185,6 +186,7 @@ foreach ($m in $MODULES) {
     if ($LASTEXITCODE -eq 0) { Write-Host " OK" -ForegroundColor Green }
     else { Write-Host " WARN (check manually)" -ForegroundColor Yellow }
 }
+
 
 # ── Cache clear ───────────────────────────────────────────────
 Write-Host ""

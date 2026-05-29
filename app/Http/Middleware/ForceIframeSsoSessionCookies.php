@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -53,10 +54,37 @@ class ForceIframeSsoSessionCookies
             'broadcasting.default' => env('BROADCAST_CONNECTION', 'reverb'),
         ]);
         $response = $next($request);
+        $legacyDomain = $this->legacyCookieDomain();
+
+        $guardSessionKey = Auth::guard('web')->getName();
+        $session = $request->hasSession() ? $request->session() : null;
+        $sessionKeys = [];
+
+        if ($session !== null) {
+            $all = $session->all();
+            if (is_array($all)) {
+                $sessionKeys = array_keys($all);
+            }
+        }
+
+        $hasLoginKey = $session !== null && $session->has($guardSessionKey);
+        $hasPortalCookie = $request->cookies->has(self::PORTAL_SESSION_COOKIE);
+        $isPortalHost = $request->getHost() === (string) parse_url((string) config('app.url'), PHP_URL_HOST);
+        $shouldLogSessionState = $isPortalHost && (
+            $request->is('api/v1/sso/*') ||
+            $request->is('/') ||
+            $request->is('homepage') ||
+            ($hasPortalCookie && ! $hasLoginKey)
+        );
+
+        if ($shouldLogSessionState) {
+        }
 
         foreach (self::LEGACY_SESSION_COOKIES as $cookieName) {
             $response->headers->setCookie(Cookie::forget($cookieName, '/'));
-            $response->headers->setCookie(Cookie::forget($cookieName, '/', '.deoris.test'));
+            if ($legacyDomain !== null) {
+                $response->headers->setCookie(Cookie::forget($cookieName, '/', $legacyDomain));
+            }
         }
 
         return $response;
@@ -92,5 +120,25 @@ class ForceIframeSsoSessionCookies
             return $val;
         }
         return null;
+    }
+
+    private function legacyCookieDomain(): ?string
+    {
+        $sessionDomain = env('SESSION_DOMAIN');
+        if (is_string($sessionDomain) && $sessionDomain !== '' && strtolower($sessionDomain) !== 'null') {
+            return str_starts_with($sessionDomain, '.') ? $sessionDomain : ".{$sessionDomain}";
+        }
+
+        $appUrl = env('APP_URL');
+        if (! is_string($appUrl) || $appUrl === '') {
+            return null;
+        }
+
+        $host = parse_url($appUrl, PHP_URL_HOST);
+        if (! is_string($host) || $host === '') {
+            return null;
+        }
+
+        return ".{$host}";
     }
 }

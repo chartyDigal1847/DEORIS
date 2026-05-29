@@ -8,6 +8,8 @@ use App\Services\Sso\SsoAuditLog;
 use App\Services\Sso\TokenValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
@@ -39,6 +41,7 @@ class SsoController extends Controller
      */
     public function checkSession(Request $request): JsonResponse
     {
+        $startedAt = microtime(true);
         try {
             $user = $this->portalSessionUser();
 
@@ -79,8 +82,15 @@ class SsoController extends Controller
      */
     public function issueToken(Request $request): JsonResponse
     {
+        $startedAt = microtime(true);
         try {
             $user = $this->portalSessionUser();
+            $recoveredFromSessionTable = false;
+
+            if (! $user) {
+                $user = $this->recoverSessionUserFromSessionTable($request);
+                $recoveredFromSessionTable = $user instanceof User;
+            }
 
             if (! $user) {
                 SsoAuditLog::logSessionCheckFailed('no_authenticated_user');
@@ -92,6 +102,10 @@ class SsoController extends Controller
                 return $this->error('email_unverified', 403);
             }
 
+            if ($recoveredFromSessionTable) {
+                $this->rehydrateWebSession($request, $user);
+            }
+
             // ── CRITICAL: Validate user can issue a token ─────────────────────────
             // This checks for stale tokens and enforces revoke-before-issue pattern.
             $validation = TokenValidator::validateUserCanIssue($user);
@@ -100,15 +114,17 @@ class SsoController extends Controller
             }
 
             // ── CRITICAL: Revoke all existing SSO tokens for this user ───────────
-            // This ensures only one outstanding token exists per user. If a stale
-            // token persists, it will be deleted before a new one is issued.
+            // Cleanup only truly stale SSO tokens so concurrent module handshakes
+            // do not invalidate each other during rapid module switching.
             $existingCount = $user->tokens()
                 ->where('name', 'sso-token')
+                ->where('created_at', '<', now()->subMinutes(2))
                 ->count();
 
             if ($existingCount > 0) {
                 $user->tokens()
                     ->where('name', 'sso-token')
+                    ->where('created_at', '<', now()->subMinutes(2))
                     ->delete();
 
                 SsoAuditLog::logStaleTokenCleanup($user, $existingCount);
@@ -148,6 +164,7 @@ class SsoController extends Controller
      */
     public function exchangeToken(Request $request): JsonResponse
     {
+        $startedAt = microtime(true);
         try {
             // ── Validate request format ──────────────────────────────────────────
             $validator = Validator::make($request->all(), [
@@ -181,6 +198,14 @@ class SsoController extends Controller
             }
 
             $user = $validation['user'];
+
+            if (
+                $request->hasSession()
+                && $request->hasCookie((string) config('session.cookie'))
+                && ! auth('web')->check()
+            ) {
+                $this->rehydrateWebSession($request, $user);
+            }
 
             // ── Log successful exchange ──────────────────────────────────────────
             SsoAuditLog::logTokenExchanged($user, $tokenString, $request->header('Origin'));
@@ -271,5 +296,87 @@ class SsoController extends Controller
         $user = auth('web')->user();
 
         return $user instanceof User ? $user : null;
+    }
+
+
+    private function currentDbName(): ?string
+    {
+        try {
+            return DB::scalar('select database()');
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    private function recoverSessionUserFromSessionTable(Request $request): ?User
+    {
+        $sessionId = (string) $request->session()->getId();
+        if ($sessionId === '') {
+            return null;
+        }
+
+        $sessionTable = (string) config('session.table', 'sessions');
+        $sessionRow = DB::table($sessionTable)
+            ->select(['id', 'user_id', 'payload', 'last_activity'])
+            ->where('id', $sessionId)
+            ->first();
+
+        $guardKey = Auth::guard('web')->getName();
+        $payloadUserId = $this->extractUserIdFromSessionPayload(
+            is_string($sessionRow?->payload ?? null) ? $sessionRow->payload : null,
+            $guardKey
+        );
+
+
+        $sessionUserId = (int) ($sessionRow?->user_id ?? 0);
+        if ($sessionUserId <= 0 && ($payloadUserId ?? 0) > 0) {
+            $sessionUserId = (int) $payloadUserId;
+            DB::table($sessionTable)
+                ->where('id', $sessionId)
+                ->update(['user_id' => $sessionUserId]);
+
+        }
+
+        if ($sessionUserId <= 0) {
+            return null;
+        }
+
+        $user = User::find($sessionUserId);
+        if (! $user instanceof User) {
+            return null;
+        }
+
+
+        return $user;
+    }
+
+    private function extractUserIdFromSessionPayload(?string $encodedPayload, string $guardKey): ?int
+    {
+        if (! is_string($encodedPayload) || trim($encodedPayload) === '') {
+            return null;
+        }
+
+        $decoded = base64_decode($encodedPayload, true);
+        if (! is_string($decoded) || $decoded === '') {
+            return null;
+        }
+
+        $sessionData = @unserialize($decoded);
+        if (! is_array($sessionData)) {
+            return null;
+        }
+
+        $candidate = (int) ($sessionData[$guardKey] ?? 0);
+        return $candidate > 0 ? $candidate : null;
+    }
+
+    private function rehydrateWebSession(Request $request, User $user): void
+    {
+        $guard = Auth::guard('web');
+        $guardKey = $guard->getName();
+        $request->session()->put($guardKey, $user->getAuthIdentifier());
+        $request->session()->put('password_hash_web', $user->getAuthPassword());
+        $guard->setUser($user);
+
     }
 }

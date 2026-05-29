@@ -142,18 +142,6 @@ class TokenValidator
                 return ['success' => false, 'error' => 'invalid_user'];
             }
 
-            $existingTokens = $user->tokens()
-                ->where('name', 'sso-token')
-                ->count();
-
-            if ($existingTokens > 0) {
-                Log::warning('Found stale SSO tokens during issue. Revoking.', [
-                    'user_id' => $user->id,
-                    'stale_tokens' => $existingTokens,
-                ]);
-                $user->tokens()->where('name', 'sso-token')->delete();
-            }
-
             return ['success' => true];
 
         } catch (Throwable $e) {

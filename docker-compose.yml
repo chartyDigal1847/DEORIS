@@ -41,11 +41,9 @@ services:
     image: mysql:8.0
     container_name: deoris_mysql
     restart: unless-stopped
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-deoris_identity_db}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret-root-password}
       MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
       MYSQL_USER: ${DB_USERNAME:-deoris}
     volumes:
@@ -58,8 +56,6 @@ services:
     image: redis:7-alpine
     container_name: deoris_redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     volumes:
       - deoris_redis_data:/data
     networks:
@@ -93,11 +89,42 @@ services:
     volumes:
       - .:/var/www
     command: php artisan reverb:start --host=0.0.0.0 --port=8081
-    ports:
-      - "8081:8081"
     depends_on:
       - app
       - redis
+    networks:
+      - deoris_network
+
+  # ─── Redis Event Listener ───────────────────────────────────────────────────
+  redis_listener:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deoris_redis_listener
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: php artisan deoris:events:listen
+    depends_on:
+      - app
+      - redis
+    networks:
+      - deoris_network
+
+  # ─── Scheduler Worker ───────────────────────────────────────────────────────
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deoris_scheduler
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: php artisan schedule:work
+    depends_on:
+      - app
     networks:
       - deoris_network
 

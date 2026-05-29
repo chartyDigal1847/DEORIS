@@ -46,7 +46,7 @@ return [
     'allowed_methods' => ['GET', 'POST', 'PATCH', 'OPTIONS'],
 
     'allowed_origins' => [
-        'https://deoris.test',
+        env('APP_URL', 'https://deoris.test'),
         env('ENTRYEASE_URL', 'https://entryease.deoris.test'),
         env('ENROLLEASE_URL', 'https://enrollease.deoris.test'),
         env('GRADETRACK_URL', 'https://gradetrack.deoris.test'),

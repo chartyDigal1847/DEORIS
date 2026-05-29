@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'module.signature' => \App\Http\Middleware\VerifyModuleSignature::class,
             'module.portal_admin' => \App\Http\Middleware\VerifyModulePortalAdmin::class,
             'sso.secure'       => EnforceSsoSecurityHeaders::class,
+            'sso.throttle'     => \App\Http\Middleware\SsoThrottle::class,
         ]);
 
         // Iframe SSO is an API handshake, not a web form submission. These
