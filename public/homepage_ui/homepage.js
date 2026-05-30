@@ -238,7 +238,11 @@
 
   openSidebarBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
-    openMobileSidebar();
+    if (portal?.classList.contains("is-sidebar-open")) {
+      closeMobileSidebar();
+    } else {
+      openMobileSidebar();
+    }
   });
 
   sidebarBackdrop?.addEventListener("click", () => {
