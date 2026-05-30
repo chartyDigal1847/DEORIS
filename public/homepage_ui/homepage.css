@@ -232,6 +232,7 @@ button {
 }
 
 .navItem {
+  position: relative;
   width: 100%;
   min-height: 36px;
   height: auto;
@@ -243,7 +244,18 @@ button {
   border-radius: 12px;
   color: #fff8ec;
   text-decoration: none;
-  transition: background 150ms ease, color 150ms ease, transform 120ms ease;
+  outline: 0;
+  transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.navItem::before {
+  content: "";
+  position: absolute;
+  inset: 7px auto 7px 0;
+  width: 3px;
+  border-radius: 999px;
+  background: transparent;
+  transition: background 150ms ease;
 }
 
 .navItem:hover {
@@ -251,13 +263,21 @@ button {
 }
 
 .navItem:active {
-  transform: translateY(1px);
+  transform: none;
 }
 
 .navItem.is-active {
   color: #241910;
   background: linear-gradient(135deg, var(--gold-light), var(--gold));
-  box-shadow: 0 8px 18px rgba(64, 41, 11, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(36, 25, 16, 0.08);
+}
+
+.navItem.is-active::before {
+  background: var(--burgundy-dark);
+}
+
+.navItem:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(243, 223, 139, 0.75);
 }
 
 .navItem__icon {
@@ -3559,10 +3579,13 @@ html.portal-nav-open body {
     transform: none;
   }
 
-  .navItem:active,
   .homeFeatureCard:active,
   .homeModuleCard:active {
     transform: scale(0.99);
+  }
+
+  .navItem:active {
+    transform: none;
   }
 }
 
