@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
-  <link rel="stylesheet" href="{{ asset('login_ui/login_signup.css') }}" />
+  <link rel="stylesheet" href="{{ asset('login_ui/login_signup.css') }}?v={{ filemtime(public_path('login_ui/login_signup.css')) }}" />
 </head>
 <body>
 
@@ -193,6 +193,6 @@
     </section>
   </main>
 
-  <script src="{{ asset('login_ui/login_signup.js') }}"></script>
+  <script src="{{ asset('login_ui/login_signup.js') }}?v={{ filemtime(public_path('login_ui/login_signup.js')) }}"></script>
 </body>
 </html>
