@@ -110,6 +110,7 @@ if [[ ! -f "${ENV_FILE}" ]]; then
 fi
 
 # Docker network service names for shared MySQL/Redis.
+sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' "${ENV_FILE}"
 sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' "${ENV_FILE}"
 sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' "${ENV_FILE}"
 sed -i 's/^DEORIS_DB_HOST=.*/DEORIS_DB_HOST=mysql/' "${ENV_FILE}" 2>/dev/null || true
