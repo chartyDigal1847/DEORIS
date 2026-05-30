@@ -972,22 +972,22 @@ select:focus-visible, textarea:focus-visible {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 36px;
-    padding: 0 1rem;
+    min-height: 34px;
+    padding: 0 .9rem;
     border-radius: 12px;
-    font-size: .74rem;
-    font-weight: 850;
-    letter-spacing: .02em;
+    font-size: .72rem;
+    font-weight: 750;
+    letter-spacing: .01em;
     line-height: 1;
     white-space: nowrap;
   }
 
   .nav-pill--login {
-    color: var(--clr-primary-d);
-    border: 1px solid rgba(201,168,76,.75);
-    background: linear-gradient(135deg, rgba(240,217,138,.96), rgba(201,168,76,.9));
-    box-shadow: 0 6px 16px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35);
-    text-transform: uppercase;
+    color: rgba(255,255,255,.92);
+    border: 1px solid rgba(255,255,255,.28);
+    background: rgba(255,255,255,.1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+    backdrop-filter: blur(8px);
   }
 
   .nav-links {
@@ -1434,8 +1434,8 @@ select:focus-visible, textarea:focus-visible {
   }
 
   .nav-pill {
-    min-height: 34px;
-    padding-inline: .88rem;
+    min-height: 32px;
+    padding-inline: .72rem;
     font-size: .68rem;
   }
 
@@ -1500,7 +1500,7 @@ select:focus-visible, textarea:focus-visible {
   }
 
   .nav-pill {
-    padding-inline: .72rem;
+    padding-inline: .58rem;
     font-size: .6rem;
   }
 
