@@ -2632,10 +2632,6 @@ button {
   margin-bottom: 20px;
 }
 
-.homeBottom--single {
-  grid-template-columns: 1fr;
-}
-
 .homePanel {
   padding: 20px;
   border: 1px solid var(--border);

@@ -541,32 +541,6 @@
       } catch (_) { /* network error — silently ignore */ }
     }
 
-    async function loadActivity() {
-      try {
-        const r = await fetch("/portal/event-logs?per_page=5", {
-          headers: portalHeaders(),
-          credentials: "include",
-        });
-        if (!r.ok) return;
-        const { data: rows } = await r.json();
-        const ul = document.getElementById("hp-admin-activity");
-        if (!ul || !rows?.length) return;
-        const statusColor = {
-          received: "#3b82f6", processing: "#f59e0b",
-          processed: "#16a34a", failed: "#ef4444",
-        };
-        ul.innerHTML = rows.map((row) => `
-          <li class="homeActivity__item">
-            <span class="homeActivity__dot" style="background:${statusColor[row.status] || "#9ca3af"}"></span>
-            <div class="homeActivity__body">
-              <strong>${escapeHtml(row.event_name || "Event")}</strong>
-              <span>${escapeHtml(row.source_module || "")} &middot; ${escapeHtml(row.received_at || "")}</span>
-            </div>
-            <span class="homeActivity__badge homeActivity__badge--${escapeHtml(row.status)}">${escapeHtml(row.status)}</span>
-          </li>`).join("");
-      } catch (_) { /* silently ignore */ }
-    }
-
     function statusBadge(status) {
       const normalized = String(status || "unknown").toLowerCase();
       const tone = {
@@ -655,7 +629,6 @@
     document.getElementById("hp-refresh-events")?.addEventListener("click", loadAdminEvents);
 
     loadStats();
-    loadActivity();
     loadServices();
     loadAdminEvents();
     setInterval(loadStats, 60_000);
@@ -665,7 +638,6 @@
       window.Echo.private("event-monitoring")
         .listen(".event.processed", () => {
           loadStats();
-          loadActivity();
           loadAdminEvents();
         });
     }

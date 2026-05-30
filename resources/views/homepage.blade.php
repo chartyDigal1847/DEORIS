@@ -360,30 +360,6 @@
               </div>
             </div>
 
-            {{-- ── System activity ───────────────────────────────────────── --}}
-            <div class="homeBottom homeBottom--single">
-              <div class="homePanel">
-                <div class="homePanel__head">
-                  <h3 class="homePanel__title">System Activity</h3>
-                  <a href="{{ url('/admin/dashboard') }}" class="homePanel__link" data-native-link="true">View all</a>
-                </div>
-                <ul class="homeActivity" id="hp-admin-activity">
-                  <li class="homeActivity__item homeActivity__item--loading">
-                    <div class="homeActivity__skeleton"></div>
-                    <div class="homeActivity__skeleton homeActivity__skeleton--sm"></div>
-                  </li>
-                  <li class="homeActivity__item homeActivity__item--loading">
-                    <div class="homeActivity__skeleton"></div>
-                    <div class="homeActivity__skeleton homeActivity__skeleton--sm"></div>
-                  </li>
-                  <li class="homeActivity__item homeActivity__item--loading">
-                    <div class="homeActivity__skeleton"></div>
-                    <div class="homeActivity__skeleton homeActivity__skeleton--sm"></div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
             {{-- ── Bottom admin monitoring ───────────────────────────────── --}}
             <div class="homeAdminOps">
               <div class="homeSection__head">
