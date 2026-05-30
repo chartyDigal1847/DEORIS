@@ -50,8 +50,8 @@
   const flashError         = document.getElementById("flashError");
   const flashErrorDismiss  = flashError?.querySelector(".flashError__dismiss");
 
-  // Guard — exit immediately on non-portal pages (profile, API tokens, etc.)
-  if (!portal || !moduleFrame) return;
+  // Guard — shared shell controls run on both portal iframe pages and account/admin pages.
+  if (!portal) return;
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 

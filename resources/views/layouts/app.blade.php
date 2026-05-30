@@ -23,7 +23,7 @@
         <link rel="shortcut icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <link rel="stylesheet" href="{{ asset('homepage_ui/homepage.css') }}">
+        <link rel="stylesheet" href="{{ asset('homepage_ui/homepage.css') }}?v={{ filemtime(public_path('homepage_ui/homepage.css')) }}">
 
         @livewireStyles
     </head>
@@ -49,6 +49,15 @@
                 </button>
 
                 <nav class="sidebar__nav">
+                    <a class="navItem {{ request()->routeIs('admin.dashboard', 'homepage', 'dashboard') ? 'is-active' : '' }}"
+                       href="{{ $user?->role === \App\Models\User::ROLE_ADMIN ? route('admin.dashboard') : route('homepage') }}"
+                       data-native-link="true">
+                        <span class="navItem__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                        </span>
+                        <span class="navItem__label">Dashboard</span>
+                    </a>
+
                     <a class="navItem {{ request()->routeIs('profile.show') ? 'is-active' : '' }}" href="{{ route('profile.show') }}" data-native-link="true">
                         <span class="navItem__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0" /><circle cx="12" cy="7" r="4" /></svg>
@@ -66,6 +75,8 @@
                     @endif
                 </nav>
             </aside>
+
+            <div class="sidebarBackdrop" id="sidebarBackdrop" hidden aria-hidden="true"></div>
 
             <header class="topbar">
                 <button class="mobileMenu" id="openSidebar" type="button" aria-label="Open menu">
@@ -119,6 +130,7 @@
 
         @livewireScripts
         <script src="{{ asset('homepage_ui/portal-notifications.js') }}?v={{ filemtime(public_path('homepage_ui/portal-notifications.js')) }}"></script>
+        <script src="{{ asset('homepage_ui/homepage.js') }}?v={{ filemtime(public_path('homepage_ui/homepage.js')) }}"></script>
         @stack('scripts')
     </body>
 </html>
