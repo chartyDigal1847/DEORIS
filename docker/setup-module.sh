@@ -140,7 +140,12 @@ docker compose exec -T "${SERVICE}" composer install --no-dev --optimize-autoloa
 
 if docker compose exec -T "${SERVICE}" test -f package.json; then
   echo "[setup-module] Building frontend assets..."
-  docker compose exec -T "${SERVICE}" npm ci
+  if docker compose exec -T "${SERVICE}" test -f package-lock.json; then
+    docker compose exec -T "${SERVICE}" npm ci
+  else
+    echo "[setup-module] No package-lock.json; using npm install."
+    docker compose exec -T "${SERVICE}" npm install
+  fi
   docker compose exec -T "${SERVICE}" npm run build
 fi
 
