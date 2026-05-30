@@ -82,6 +82,8 @@ services:
     image: mysql:8.0
     container_name: deoris_mysql
     restart: unless-stopped
+    # Required for module migrations that create triggers/stored routines without SUPER.
+    command: --log-bin-trust-function-creators=1
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-deoris_identity_db}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret-root-password}
