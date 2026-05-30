@@ -402,7 +402,7 @@
                       <p class="homePanel__sub">Latest ecosystem activity.</p>
                     </div>
                     <div class="homePanel__actions">
-                      <a href="{{ url('/admin/dashboard') }}" class="homePanel__link" data-native-link="true">View all</a>
+                      <a href="{{ route('admin.monitoring') }}" class="homePanel__link" data-native-link="true">View all</a>
                       <button id="hp-refresh-events" type="button" class="homePanel__link homePanel__button">Refresh</button>
                     </div>
                   </div>

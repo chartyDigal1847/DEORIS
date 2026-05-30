@@ -49,8 +49,8 @@
                 </button>
 
                 <nav class="sidebar__nav">
-                    <a class="navItem {{ request()->routeIs('admin.dashboard', 'homepage', 'dashboard') ? 'is-active' : '' }}"
-                       href="{{ $user?->role === \App\Models\User::ROLE_ADMIN ? route('admin.dashboard') : route('homepage') }}"
+                    <a class="navItem {{ request()->routeIs('homepage', 'dashboard') ? 'is-active' : '' }}"
+                       href="{{ route('homepage') }}"
                        data-native-link="true">
                         <span class="navItem__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>

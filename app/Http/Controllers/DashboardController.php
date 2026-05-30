@@ -20,10 +20,7 @@ class DashboardController extends Controller
      */
     public function redirect(Request $request): RedirectResponse
     {
-        return match ($request->user()->role) {
-            User::ROLE_ADMIN => redirect()->route('admin.dashboard'),
-            default          => redirect()->route('homepage'),
-        };
+        return redirect()->route('homepage');
     }
 
     /**
@@ -44,7 +41,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Admin-only dashboard view.
+     * Admin-only monitoring view.
      */
     public function admin(): View
     {

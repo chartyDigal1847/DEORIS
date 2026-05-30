@@ -39,9 +39,13 @@ $portalRoutes = static function (): void {
             Route::get('/dashboard', fn () => redirect()->route('homepage'))
                 ->name('dashboard');
 
-            Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
+            Route::get('/admin/dashboard', fn () => redirect()->route('homepage'))
                 ->middleware('role:' . User::ROLE_ADMIN)
                 ->name('admin.dashboard');
+
+            Route::get('/admin/monitoring', [DashboardController::class, 'admin'])
+                ->middleware('role:' . User::ROLE_ADMIN)
+                ->name('admin.monitoring');
 
             // Main portal homepage — passes user-specific module visibility.
             Route::get('/homepage', [DashboardController::class, 'homepage'])
