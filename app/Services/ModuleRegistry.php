@@ -84,23 +84,28 @@ final class ModuleRegistry
      */
     public function links(): array
     {
+        $urls = config('modules.urls', []);
+        $labels = config('modules.labels', []);
+
         return collect($this->all())
             ->map(fn (array $module, string $key) => [
-                'url' => env($module['env'], $module['url']),
-                'label' => $module['label'],
+                'url' => $urls[$key] ?? $module['url'],
+                'label' => $labels[$key] ?? $module['label'],
             ])
             ->all();
     }
 
     /**
-     * Get all module URLs (resolved from env or default).
+     * Get all module URLs (resolved from config or default).
      *
      * @return array<int, string>
      */
     public function urls(): array
     {
+        $configured = config('modules.urls', []);
+
         return collect($this->all())
-            ->map(fn (array $module) => env($module['env'], $module['url']))
+            ->map(fn (array $module, string $key) => $configured[$key] ?? $module['url'])
             ->filter()
             ->values()
             ->all();

@@ -1,3 +1,19 @@
+x-module-app: &module-app
+  build:
+    context: .
+    dockerfile: docker/Dockerfile.module
+  restart: unless-stopped
+  working_dir: /var/www
+  environment:
+    - APP_ENV=${APP_ENV:-production}
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks:
+    - deoris_network
+
 services:
 
   # ─── Nginx ────────────────────────────────────────────────────────────────
@@ -10,10 +26,32 @@ services:
       - "443:443"
     volumes:
       - .:/var/www
+      - ..:/opt/deoris:ro
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/modules.conf:/etc/nginx/conf.d/modules.conf
       - ./docker/nginx/certs:/etc/nginx/certs:ro
     depends_on:
       app:
+        condition: service_started
+      module_entryease:
+        condition: service_started
+      module_enrollease:
+        condition: service_started
+      module_gradetrack:
+        condition: service_started
+      module_meditrack:
+        condition: service_started
+      module_librarysys:
+        condition: service_started
+      module_taskflow:
+        condition: service_started
+      module_careerconnect:
+        condition: service_started
+      module_assesspay:
+        condition: service_started
+      module_votesys:
+        condition: service_started
+      module_clearcheck:
         condition: service_started
     networks:
       - deoris_network
@@ -149,6 +187,77 @@ services:
         condition: service_started
     networks:
       - deoris_network
+
+  # ─── Module PHP-FPM Apps ────────────────────────────────────────────────────
+  module_entryease:
+    <<: *module-app
+    container_name: deoris_module_entryease
+    volumes:
+      - ../entryEase:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_enrollease:
+    <<: *module-app
+    container_name: deoris_module_enrollease
+    volumes:
+      - ../EnrollEase:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_gradetrack:
+    <<: *module-app
+    container_name: deoris_module_gradetrack
+    volumes:
+      - ../gradeTrack:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_meditrack:
+    <<: *module-app
+    container_name: deoris_module_meditrack
+    volumes:
+      - ../MediTrack:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_librarysys:
+    <<: *module-app
+    container_name: deoris_module_librarysys
+    volumes:
+      - ../LibrarySys:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_taskflow:
+    <<: *module-app
+    container_name: deoris_module_taskflow
+    volumes:
+      - ../taskflow:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_careerconnect:
+    <<: *module-app
+    container_name: deoris_module_careerconnect
+    volumes:
+      - ../carrerConnect:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_assesspay:
+    <<: *module-app
+    container_name: deoris_module_assesspay
+    volumes:
+      - ../asssesspay:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_votesys:
+    <<: *module-app
+    container_name: deoris_module_votesys
+    volumes:
+      - ../VoteSys:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  module_clearcheck:
+    <<: *module-app
+    container_name: deoris_module_clearcheck
+    volumes:
+      - ../ClearCheck:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
 
 # ─── Volumes ──────────────────────────────────────────────────────────────────
 volumes:

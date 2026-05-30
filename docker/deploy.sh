@@ -39,7 +39,7 @@ if [[ "${SKIP_BUILD}" == "1" ]]; then
   echo "[deploy] SKIP_BUILD=1 -> using existing images"
   docker compose up -d
 else
-  echo "[deploy] Rebuilding and starting containers..."
+  echo "[deploy] Rebuilding and starting containers (portal + modules)..."
   docker compose up -d --build
 fi
 

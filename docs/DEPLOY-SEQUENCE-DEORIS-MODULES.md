@@ -15,7 +15,26 @@ cd /opt/deoris/DEORIS
 ./docker/deploy.sh
 ```
 
-## 2) Deploy Modules in Dependency Order
+## 2) Deploy Modules (Docker nginx front door)
+
+All modules run as PHP-FPM containers behind the same DEORIS Docker nginx.
+
+```bash
+cd /opt/deoris/DEORIS
+chmod +x docker/pull-all.sh docker/setup-all-modules.sh docker/verify-modules.sh
+
+./docker/pull-all.sh
+./docker/setup-all-modules.sh
+./docker/verify-modules.sh
+```
+
+Single-module bootstrap:
+
+```bash
+./docker/setup-module.sh entryease
+```
+
+Module order inside `setup-all-modules.sh`:
 
 1. `entryEase`
 2. `EnrollEase`
@@ -28,17 +47,7 @@ cd /opt/deoris/DEORIS
 9. `ClearCheck`
 10. `carrerConnect`
 
-For each module:
-
-```bash
-git pull --ff-only origin main
-composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-php artisan optimize:clear
-php artisan optimize
-```
-
-If module uses queue/scheduler/reverb workers, restart those workers after deploy.
+Before running setup, replace all `change-me-*` values in each module `.env` and ensure event/search secrets match the DEORIS portal `.env`.
 
 ## 3) Immediate Sanity Checks
 
@@ -46,3 +55,5 @@ If module uses queue/scheduler/reverb workers, restart those workers after deplo
 - load homepage and open every module once
 - verify no 401/419/CSP/CORS errors in browser console
 - verify module bootstrap APIs respond normally
+
+See also: [DEPLOYMENT-DOCKER-DEORIS-NET.md](./DEPLOYMENT-DOCKER-DEORIS-NET.md)

@@ -4,6 +4,42 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Module URLs (config-cache safe)
+    |--------------------------------------------------------------------------
+    |
+    | Used by ModuleRegistry for iframe links and API gateway routing.
+    | Values come from .env at config:cache time.
+    |
+    */
+
+    'urls' => [
+        'entryease' => env('ENTRYEASE_URL', 'https://entryease.deoris.net'),
+        'enrollease' => env('ENROLLEASE_URL', 'https://enrollease.deoris.net'),
+        'gradetrack' => env('GRADETRACK_URL', 'https://gradetrack.deoris.net'),
+        'meditrack' => env('MEDITRACK_URL', 'https://meditrack.deoris.net'),
+        'librarysys' => env('LIBRARYSYS_URL', 'https://librarysys.deoris.net'),
+        'taskflow' => env('TASKFLOW_URL', 'https://taskflow.deoris.net'),
+        'careerconnect' => env('CAREERCONNECT_URL', 'https://careerconnect.deoris.net'),
+        'assesspay' => env('ASSESSPAY_URL', 'https://assesspay.deoris.net'),
+        'votesys' => env('VOTESYS_URL', 'https://votesys.deoris.net'),
+        'clearcheck' => env('CLEARCHECK_URL', 'https://clearcheck.deoris.net'),
+    ],
+
+    'labels' => [
+        'entryease' => 'EntryEase',
+        'enrollease' => 'EnrollEase',
+        'gradetrack' => 'GradeTrack',
+        'meditrack' => 'MediTrack',
+        'librarysys' => 'LibrarySys',
+        'taskflow' => 'TaskFlow',
+        'careerconnect' => 'CareerConnect',
+        'assesspay' => 'AssessPay',
+        'votesys' => 'VoteSys',
+        'clearcheck' => 'ClearCheck',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Allowed Module Origins
     |--------------------------------------------------------------------------
     |
@@ -11,26 +47,22 @@ return [
     | the portal shell.  Used by:
     |   - config/cors.php  (Access-Control-Allow-Origin)
     |   - portal-bridge.js (postMessage origin validation)
-    |   - LoginResponse    (open-redirect guard — no longer used but kept for
-    |                       reference if redirect_to is ever re-introduced)
     |
-    | All entries MUST use https:// and match the SESSION_DOMAIN wildcard
-    | (.deoris.test) so the session cookie is sent inside the iframe.
+    | All entries MUST use https:// and match SESSION_DOMAIN (.deoris.net).
     |
     */
 
     'allowed' => [
-        'https://entryease.deoris.test',
-        'https://enrollease.deoris.test',
-        'https://gradetrack.deoris.test',
-        'https://meditrack.deoris.test',
-        'https://librarysys.deoris.test',
-        'https://taskflow.deoris.test',
-        'https://careerconnect.deoris.test',
-        'https://assesspay.deoris.test',
-        'https://votesys.deoris.test',
-        'https://clearcheck.deoris.test',
+        'https://entryease.deoris.net',
+        'https://enrollease.deoris.net',
+        'https://gradetrack.deoris.net',
+        'https://meditrack.deoris.net',
+        'https://librarysys.deoris.net',
+        'https://taskflow.deoris.net',
+        'https://careerconnect.deoris.net',
+        'https://assesspay.deoris.net',
+        'https://votesys.deoris.net',
+        'https://clearcheck.deoris.net',
     ],
 
 ];
-

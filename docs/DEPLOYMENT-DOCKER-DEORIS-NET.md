@@ -70,6 +70,16 @@ Expected services:
 - `reverb`
 - `redis_listener`
 - `scheduler`
+- `module_entryease`, `module_enrollease`, `module_gradetrack`, `module_meditrack`
+- `module_librarysys`, `module_taskflow`, `module_careerconnect`, `module_assesspay`
+- `module_votesys`, `module_clearcheck`
+
+Nginx config:
+
+- `docker/nginx/default.conf` — portal (`deoris.net`)
+- `docker/nginx/modules.conf` — all module subdomains
+
+Module code is mounted from sibling folders under `/opt/deoris/` (for example `/opt/deoris/entryEase`).
 
 Security posture:
 
@@ -98,7 +108,29 @@ What it does:
 
 ## 5) Module Deployment Order
 
-After DEORIS deploys successfully, deploy modules in this order:
+After DEORIS deploys successfully, bootstrap all modules behind Docker nginx:
+
+```bash
+cd /opt/deoris/DEORIS
+chmod +x docker/pull-all.sh docker/setup-module.sh docker/setup-all-modules.sh docker/verify-modules.sh
+
+# 1) Pull latest code for portal + all modules
+./docker/pull-all.sh
+
+# 2) Edit each module .env (or let setup copy from .env.example), then replace change-me-* secrets
+#    Match *_EVENT_SECRET and *_SEARCH_TOKEN values with DEORIS .env
+
+# 3) Bootstrap all modules (creates DBs, composer install, migrate, cache)
+./docker/setup-all-modules.sh
+
+# Or one module at a time:
+# ./docker/setup-module.sh entryease
+
+# 4) Verify
+./docker/verify-modules.sh
+```
+
+Deploy order (handled by `setup-all-modules.sh`):
 
 1. `entryEase`
 2. `EnrollEase`
@@ -111,13 +143,12 @@ After DEORIS deploys successfully, deploy modules in this order:
 9. `ClearCheck`
 10. `carrerConnect`
 
-For each module:
+Each module setup script:
 
-- pull latest code
-- install production dependencies
-- run migrations
-- clear/rebuild caches
-- restart workers/services
+- copies `.env.example` → `.env` if missing
+- sets `DB_HOST=mysql` and `REDIS_HOST=redis` for Docker networking
+- creates the module database/user in MySQL
+- runs `composer install`, optional `npm run build`, migrations, and caches
 
 ## 6) Post-Deploy Verification
 
