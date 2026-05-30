@@ -2624,12 +2624,107 @@ button {
   transform: translateX(3px);
 }
 
+/* ── Quick Access (compact chips under stats) ─────────────────────────────── */
+.homeQuickAccess {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.homeQuickAccess__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.homeQuickAccess__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.homeQuickAccess__sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.homeQuickAccess__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.homeQuickChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 12px 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.homeQuickChip:hover {
+  border-color: var(--qc-accent, var(--burgundy));
+  background: color-mix(in srgb, var(--qc-accent, var(--burgundy)) 8%, #fff);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.homeQuickChip:focus-visible {
+  outline: 2px solid var(--qc-accent, var(--burgundy));
+  outline-offset: 2px;
+}
+
+.homeQuickChip__icon {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--qc-accent, var(--burgundy)) 14%, #fff);
+  color: var(--qc-accent, var(--burgundy));
+}
+
+.homeQuickChip__icon svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.homeQuickChip__label {
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
 /* ── Home Bottom (2-col panels) ────────────────────────────────────────────── */
 .homeBottom {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   margin-bottom: 20px;
+}
+
+.homeBottom--single {
+  grid-template-columns: 1fr;
 }
 
 .homePanel {
@@ -3318,6 +3413,13 @@ button {
   .homeStats { grid-template-columns: 1fr 1fr; }
   .homeModuleGrid { grid-template-columns: 1fr; }
   .homeActions { grid-template-columns: 1fr; }
+  .homeQuickAccess__list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .homeQuickAccess__list::-webkit-scrollbar { display: none; }
   .homeHero__statPill { flex-direction: column; gap: 8px; }
   .homeHero__statPill-divider { width: 100%; height: 1px; }
 }

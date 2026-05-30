@@ -360,8 +360,38 @@
               </div>
             </div>
 
-            {{-- ── Bottom row: Quick actions + Recent activity ───────────── --}}
-            <div class="homeBottom">
+            {{-- ── Quick Access (compact module launchers) ───────────────── --}}
+            <div class="homeQuickAccess">
+              <div class="homeQuickAccess__head">
+                <h3 class="homeQuickAccess__title">Quick Access</h3>
+                <p class="homeQuickAccess__sub">Open any module from the dashboard.</p>
+              </div>
+              <div class="homeQuickAccess__list">
+                @foreach ($visibleModules as $mk)
+                  @php
+                    $nav = $allModuleNav[$mk] ?? null;
+                    $moduleUrl = $moduleLinks[$mk]['url'] ?? '';
+                    $label = $moduleLinks[$mk]['label'] ?? ($nav['label'] ?? ucfirst($mk));
+                    $accent = ($moduleColors[$mk] ?? ['accent' => '#374151'])['accent'];
+                  @endphp
+                  @if ($nav && $moduleUrl !== '')
+                    <a href="{{ url('/' . $mk) }}"
+                       class="homeQuickChip"
+                       data-module="{{ $mk }}"
+                       data-module-url="{{ $moduleUrl }}"
+                       style="--qc-accent: {{ $accent }}">
+                      <span class="homeQuickChip__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">{!! $nav['icon'] !!}</svg>
+                      </span>
+                      <span class="homeQuickChip__label">{{ $label }}</span>
+                    </a>
+                  @endif
+                @endforeach
+              </div>
+            </div>
+
+            {{-- ── System activity ───────────────────────────────────────── --}}
+            <div class="homeBottom homeBottom--single">
               <div class="homePanel">
                 <div class="homePanel__head">
                   <h3 class="homePanel__title">System Activity</h3>
