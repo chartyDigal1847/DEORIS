@@ -135,6 +135,33 @@ GRANT ALL PRIVILEGES ON \`${DB_DATABASE}\`.* TO '${DB_USERNAME}'@'%';
 FLUSH PRIVILEGES;
 SQL
 
+if [[ "${MODULE_KEY}" == "assesspay" ]]; then
+  PORTAL_DB="$(read_env_value "${DEORIS_ROOT}/.env" DB_DATABASE)"
+  PORTAL_DB="${PORTAL_DB:-deoris_identity_db}"
+  ENROLLEASE_ENV="${DEORIS_ROOT}/../EnrollEase/.env"
+  ENROLLEASE_DB="enrollease"
+  if [[ -f "${ENROLLEASE_ENV}" ]]; then
+    ENROLLEASE_DB="$(read_env_value "${ENROLLEASE_ENV}" DB_DATABASE)"
+    ENROLLEASE_DB="${ENROLLEASE_DB:-enrollease}"
+  fi
+
+  echo "[setup-module] Granting AssessPay read access to ${PORTAL_DB} and ${ENROLLEASE_DB}..."
+  docker compose exec -T mysql mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" <<SQL
+GRANT SELECT ON \`${PORTAL_DB}\`.* TO '${DB_USERNAME}'@'%';
+GRANT SELECT ON \`${ENROLLEASE_DB}\`.* TO '${DB_USERNAME}'@'%';
+FLUSH PRIVILEGES;
+SQL
+
+  grep -q '^DEORIS_DB_HOST=' "${ENV_FILE}" || echo 'DEORIS_DB_HOST=mysql' >> "${ENV_FILE}"
+  sed -i 's/^DEORIS_DB_HOST=.*/DEORIS_DB_HOST=mysql/' "${ENV_FILE}"
+  grep -q '^DEORIS_DB_DATABASE=' "${ENV_FILE}" || echo "DEORIS_DB_DATABASE=${PORTAL_DB}" >> "${ENV_FILE}"
+  sed -i "s/^DEORIS_DB_DATABASE=.*/DEORIS_DB_DATABASE=${PORTAL_DB}/" "${ENV_FILE}"
+  grep -q '^ENROLLEASE_DB_HOST=' "${ENV_FILE}" || echo 'ENROLLEASE_DB_HOST=mysql' >> "${ENV_FILE}"
+  sed -i 's/^ENROLLEASE_DB_HOST=.*/ENROLLEASE_DB_HOST=mysql/' "${ENV_FILE}"
+  grep -q '^ENROLLEASE_DB_DATABASE=' "${ENV_FILE}" || echo "ENROLLEASE_DB_DATABASE=${ENROLLEASE_DB}" >> "${ENV_FILE}"
+  sed -i "s/^ENROLLEASE_DB_DATABASE=.*/ENROLLEASE_DB_DATABASE=${ENROLLEASE_DB}/" "${ENV_FILE}"
+fi
+
 echo "[setup-module] Installing PHP dependencies..."
 docker compose exec -T "${SERVICE}" composer install --no-dev --optimize-autoloader --no-interaction
 
