@@ -287,16 +287,6 @@
                       <span>Total Users</span>
                     </div>
                   </div>
-                  <div class="homeHero__actions">
-                    <a href="{{ url('/entryease') }}" class="homeHero__btn homeHero__btn--primary" data-module="entryease" data-module-url="{{ $moduleLinks['entryease']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M8 3h8"/><path d="M12 3v18"/><path d="M6 7h12"/><path d="M7 21h10"/></svg>
-                      Admissions
-                    </a>
-                    <a href="{{ url('/enrollease') }}" class="homeHero__btn homeHero__btn--ghost" data-module="enrollease" data-module-url="{{ $moduleLinks['enrollease']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg>
-                      Enrollment
-                    </a>
-                  </div>
                 </div>
               </div>
             </div>
@@ -372,37 +362,6 @@
 
             {{-- ── Bottom row: Quick actions + Recent activity ───────────── --}}
             <div class="homeBottom">
-              <div class="homePanel">
-                <div class="homePanel__head">
-                  <h3 class="homePanel__title">Quick Actions</h3>
-                </div>
-                <div class="homeActions">
-                  <a href="{{ url('/entryease') }}"  class="homeAction homeAction--primary" data-module="entryease"  data-module-url="{{ $moduleLinks['entryease']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 3h8"/><path d="M12 3v18"/><path d="M6 7h12"/><path d="M7 21h10"/></svg>
-                    Manage Admissions
-                  </a>
-                  <a href="{{ url('/enrollease') }}" class="homeAction homeAction--outline" data-module="enrollease" data-module-url="{{ $moduleLinks['enrollease']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg>
-                    View Enrollment
-                  </a>
-                  <a href="{{ url('/clearcheck') }}" class="homeAction homeAction--green"   data-module="clearcheck" data-module-url="{{ $moduleLinks['clearcheck']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
-                    ClearCheck Monitor
-                  </a>
-                  <a href="{{ url('/assesspay') }}"  class="homeAction homeAction--outline" data-module="assesspay"  data-module-url="{{ $moduleLinks['assesspay']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2v20"/><path d="M17 5H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8H7"/></svg>
-                    Payment Summary
-                  </a>
-                  <a href="{{ url('/gradetrack') }}" class="homeAction homeAction--outline" data-module="gradetrack" data-module-url="{{ $moduleLinks['gradetrack']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 5h16v14H4z"/><path d="M8 9h8"/><path d="M8 13h6"/></svg>
-                    Grade Reports
-                  </a>
-                  <a href="{{ url('/votesys') }}"    class="homeAction homeAction--outline" data-module="votesys"    data-module-url="{{ $moduleLinks['votesys']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
-                    VoteSys Control
-                  </a>
-                </div>
-              </div>
               <div class="homePanel">
                 <div class="homePanel__head">
                   <h3 class="homePanel__title">System Activity</h3>
@@ -511,18 +470,6 @@
                     </span>
                   </div>
                 </div>
-                <div class="homeHero__right">
-                  <div class="homeHero__actions">
-                    <a href="{{ url('/gradetrack') }}" class="homeHero__btn homeHero__btn--primary" data-module="gradetrack" data-module-url="{{ $moduleLinks['gradetrack']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8"/><path d="M8 13h6"/></svg>
-                      Input Grades
-                    </a>
-                    <a href="{{ url('/taskflow') }}" class="homeHero__btn homeHero__btn--ghost" data-module="taskflow" data-module-url="{{ $moduleLinks['taskflow']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-                      Manage Tasks
-                    </a>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -558,23 +505,6 @@
             </div>
 
             <div class="homeBottom">
-              <div class="homePanel">
-                <div class="homePanel__head"><h3 class="homePanel__title">Quick Actions</h3></div>
-                <div class="homeActions">
-                  <a href="{{ url('/gradetrack') }}"    class="homeAction homeAction--primary"  data-module="gradetrack"    data-module-url="{{ $moduleLinks['gradetrack']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 5h16v14H4z"/><path d="M8 9h8"/><path d="M8 13h6"/></svg>
-                    Input Grades
-                  </a>
-                  <a href="{{ url('/taskflow') }}"      class="homeAction homeAction--outline"  data-module="taskflow"      data-module-url="{{ $moduleLinks['taskflow']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
-                    Manage Tasks
-                  </a>
-                  <a href="{{ url('/careerconnect') }}" class="homeAction homeAction--green"    data-module="careerconnect" data-module-url="{{ $moduleLinks['careerconnect']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M16 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M6 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21c0-4 3-7 7-7"/><path d="M22 21c0-4-3-7-7-7"/></svg>
-                    CareerConnect
-                  </a>
-                </div>
-              </div>
               <div class="homePanel">
                 <div class="homePanel__head">
                   <h3 class="homePanel__title">Faculty Reminders</h3>
@@ -621,14 +551,6 @@
                       <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M12 2v20"/><path d="M17 5H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8H7"/></svg>
                       Finance module active
                     </span>
-                  </div>
-                </div>
-                <div class="homeHero__right">
-                  <div class="homeHero__actions">
-                    <a href="{{ url('/assesspay') }}" class="homeHero__btn homeHero__btn--primary" data-module="assesspay" data-module-url="{{ $moduleLinks['assesspay']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 2v20"/><path d="M17 5H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8H7"/></svg>
-                      Open AssessPay
-                    </a>
                   </div>
                 </div>
               </div>
@@ -685,14 +607,6 @@
                       <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M5 4h14v17H7a2 2 0 0 1-2-2z"/><path d="M8 4v17"/></svg>
                       Library module active
                     </span>
-                  </div>
-                </div>
-                <div class="homeHero__right">
-                  <div class="homeHero__actions">
-                    <a href="{{ url('/librarysys') }}" class="homeHero__btn homeHero__btn--primary" data-module="librarysys" data-module-url="{{ $moduleLinks['librarysys']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M5 4h14v17H7a2 2 0 0 1-2-2z"/><path d="M8 4v17"/></svg>
-                      Open LibrarySys
-                    </a>
                   </div>
                 </div>
               </div>
@@ -752,18 +666,6 @@
                     </span>
                   </div>
                 </div>
-                <div class="homeHero__right">
-                  <div class="homeHero__actions">
-                    <a href="{{ url('/entryease') }}" class="homeHero__btn homeHero__btn--primary" data-module="entryease" data-module-url="{{ $moduleLinks['entryease']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M8 3h8"/><path d="M12 3v18"/></svg>
-                      Review Applications
-                    </a>
-                    <a href="{{ url('/enrollease') }}" class="homeHero__btn homeHero__btn--ghost" data-module="enrollease" data-module-url="{{ $moduleLinks['enrollease']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg>
-                      Enrollment
-                    </a>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -798,23 +700,6 @@
             </div>
 
             <div class="homeBottom">
-              <div class="homePanel">
-                <div class="homePanel__head"><h3 class="homePanel__title">Quick Actions</h3></div>
-                <div class="homeActions">
-                  <a href="{{ url('/entryease') }}"  class="homeAction homeAction--primary"  data-module="entryease"  data-module-url="{{ $moduleLinks['entryease']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 3h8"/><path d="M12 3v18"/></svg>
-                    Review Applications
-                  </a>
-                  <a href="{{ url('/enrollease') }}" class="homeAction homeAction--outline"  data-module="enrollease" data-module-url="{{ $moduleLinks['enrollease']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg>
-                    Manage Enrollment
-                  </a>
-                  <a href="{{ url('/clearcheck') }}" class="homeAction homeAction--green"    data-module="clearcheck" data-module-url="{{ $moduleLinks['clearcheck']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
-                    ClearCheck Monitor
-                  </a>
-                </div>
-              </div>
               <div class="homePanel">
                 <div class="homePanel__head"><h3 class="homePanel__title">Registrar Reminders</h3></div>
                 <ul class="homeActivity">
@@ -860,14 +745,6 @@
                       <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M16 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21c0-4 3-7 7-7"/></svg>
                       Career services active
                     </span>
-                  </div>
-                </div>
-                <div class="homeHero__right">
-                  <div class="homeHero__actions">
-                    <a href="{{ url('/careerconnect') }}" class="homeHero__btn homeHero__btn--primary" data-module="careerconnect" data-module-url="{{ $moduleLinks['careerconnect']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M16 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M6 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21c0-4 3-7 7-7"/><path d="M22 21c0-4-3-7-7-7"/></svg>
-                      Open CareerConnect
-                    </a>
                   </div>
                 </div>
               </div>
@@ -923,14 +800,6 @@
                       <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M12 3v18"/><path d="M3 12h18"/></svg>
                       Health module active
                     </span>
-                  </div>
-                </div>
-                <div class="homeHero__right">
-                  <div class="homeHero__actions">
-                    <a href="{{ url('/meditrack') }}" class="homeHero__btn homeHero__btn--primary" data-module="meditrack" data-module-url="{{ $moduleLinks['meditrack']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 3v18"/><path d="M3 12h18"/></svg>
-                      Open MediTrack
-                    </a>
                   </div>
                 </div>
               </div>
@@ -1007,16 +876,6 @@
                     <strong>{{ $electionActive ? 'Voting Open' : 'No Active Election' }}</strong>
                     <span>{{ $electionActive ? 'Ballots are being cast' : 'Toggle ELECTION_ACTIVE to start' }}</span>
                   </div>
-                  <div class="homeHero__actions" style="margin-top:12px">
-                    <a href="{{ url('/votesys') }}" class="homeHero__btn homeHero__btn--primary" data-module="votesys" data-module-url="{{ $moduleLinks['votesys']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
-                      Open VoteSys
-                    </a>
-                    <a href="{{ url('/clearcheck') }}" class="homeHero__btn homeHero__btn--ghost" data-module="clearcheck" data-module-url="{{ $moduleLinks['clearcheck']['url'] ?? '' }}">
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-                      ClearCheck
-                    </a>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1043,19 +902,6 @@
             </div>
 
             <div class="homeBottom">
-              <div class="homePanel">
-                <div class="homePanel__head"><h3 class="homePanel__title">Quick Actions</h3></div>
-                <div class="homeActions">
-                  <a href="{{ url('/votesys') }}"    class="homeAction homeAction--primary"  data-module="votesys"    data-module-url="{{ $moduleLinks['votesys']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
-                    Open VoteSys
-                  </a>
-                  <a href="{{ url('/clearcheck') }}" class="homeAction homeAction--outline"  data-module="clearcheck" data-module-url="{{ $moduleLinks['clearcheck']['url'] ?? '' }}">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
-                    Voter Eligibility
-                  </a>
-                </div>
-              </div>
               <div class="homePanel">
                 <div class="homePanel__head"><h3 class="homePanel__title">Election Status</h3></div>
                 <ul class="homeActivity">
@@ -1262,18 +1108,6 @@
               </div>
 
               <div class="homeBottom">
-                <div class="homePanel">
-                  <div class="homePanel__head"><h3 class="homePanel__title">Quick Access</h3></div>
-                  <div class="homeActions">
-                    @foreach ($visibleModules as $mk)
-                      @php $mc = $moduleColors[$mk] ?? ['accent'=>'#374151']; @endphp
-                      <a href="{{ url('/' . $mk) }}" class="homeAction homeAction--outline" data-module="{{ $mk }}" data-module-url="{{ $moduleLinks[$mk]['url'] ?? '' }}">
-                        <svg viewBox="0 0 24 24" width="15" height="15">{!! $moduleIcons[$mk] ?? '' !!}</svg>
-                        {{ $moduleLinks[$mk]['label'] ?? ucfirst($mk) }}
-                      </a>
-                    @endforeach
-                  </div>
-                </div>
                 <div class="homePanel">
                   <div class="homePanel__head"><h3 class="homePanel__title">Notices</h3></div>
                   <ul class="homeActivity">
