@@ -401,7 +401,10 @@
                       <h3 class="homePanel__title">Recent Events</h3>
                       <p class="homePanel__sub">Latest ecosystem activity.</p>
                     </div>
-                    <button id="hp-refresh-events" type="button" class="homePanel__link homePanel__button">Refresh</button>
+                    <div class="homePanel__actions">
+                      <a href="{{ url('/admin/dashboard') }}" class="homePanel__link" data-native-link="true">View all</a>
+                      <button id="hp-refresh-events" type="button" class="homePanel__link homePanel__button">Refresh</button>
+                    </div>
                   </div>
                   <ul class="homeActivity" id="hp-admin-events">
                     <li class="homeActivity__item homeActivity__item--loading">
