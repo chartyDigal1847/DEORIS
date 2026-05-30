@@ -160,7 +160,10 @@ fi
 echo "[setup-module] Caching config/routes/views..."
 docker compose exec -T "${SERVICE}" php artisan optimize:clear
 docker compose exec -T "${SERVICE}" php artisan config:cache
-docker compose exec -T "${SERVICE}" php artisan route:cache
+if ! docker compose exec -T "${SERVICE}" php artisan route:cache; then
+  echo "[setup-module] WARN: route:cache failed; continuing without route cache."
+  docker compose exec -T "${SERVICE}" php artisan route:clear || true
+fi
 docker compose exec -T "${SERVICE}" php artisan view:cache
 
 echo "[setup-module] Fixing permissions..."
