@@ -156,6 +156,10 @@
     showPanel(frame);
   }
 
+  function moduleNeedsUiReady(frame) {
+    return frame?.dataset.module === "careerconnect";
+  }
+
   function navigateModuleFrame(frame, moduleUrl, { reload = false } = {}) {
     const baseSrc = buildModuleUrl(moduleUrl);
     const target = new URL(baseSrc);
@@ -166,6 +170,10 @@
     const onLoad = () => {
       if (!frame.src || frame.src === "about:blank") return;
       frame.removeEventListener("load", onLoad);
+      if (moduleNeedsUiReady(frame)) {
+        window.setTimeout(() => completeModuleReveal(frame, token), 6000);
+        return;
+      }
       completeModuleReveal(frame, token);
     };
 
@@ -182,6 +190,17 @@
     frame.dataset.requestedAt = String(Date.now());
     frame.src = nextSrc;
   }
+
+  window.addEventListener("message", (event) => {
+    if (!activeModuleFrame || event.source !== activeModuleFrame.contentWindow) return;
+    if (!event.data || event.data.type !== "MODULE_UI_READY") return;
+
+    const expectedUrl = activeModuleFrame.dataset.moduleUrl || "";
+    if (!isValidModuleUrl(expectedUrl)) return;
+    if (event.origin !== new URL(expectedUrl).origin) return;
+
+    completeModuleReveal(activeModuleFrame, activeRevealToken);
+  });
 
   function createModuleFrame(moduleName) {
     const frame =
