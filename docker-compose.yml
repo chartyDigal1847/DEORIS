@@ -194,6 +194,8 @@ services:
     container_name: deoris_module_entryease
     volumes:
       - ../entryEase:/var/www
+      # entryEase composer.json path repo: ../deoris/packages/DeorisIntegration
+      - ../DEORIS/packages/DeorisIntegration:/var/deoris/packages/DeorisIntegration:ro
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
 
   module_enrollease:
@@ -215,6 +217,7 @@ services:
     container_name: deoris_module_meditrack
     volumes:
       - ../MediTrack:/var/www
+      - ../DEORIS/packages/DeorisIntegration:/var/deoris/packages/DeorisIntegration:ro
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
 
   module_librarysys:
