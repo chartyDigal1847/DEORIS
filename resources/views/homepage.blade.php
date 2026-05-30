@@ -370,37 +370,6 @@
               </div>
             </div>
 
-            {{-- ── Module grid ───────────────────────────────────────────── --}}
-            <div class="homeSection">
-              <div class="homeSection__head">
-                <div>
-                  <h2 class="homeSection__title">System Modules</h2>
-                  <p class="homeSection__sub">{{ count($visibleModules) }} modules — click to open</p>
-                </div>
-                <a href="{{ url('/admin/dashboard') }}" class="homeSection__link" data-native-link="true">
-                  Full Admin Panel
-                  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                </a>
-              </div>
-              <div class="homeModuleGrid">
-                @foreach ($visibleModules as $mk)
-                  @php $mc = $moduleColors[$mk] ?? ['bg'=>'#f9fafb','accent'=>'#374151','icon_bg'=>'#e5e7eb']; @endphp
-                  <a href="{{ url('/' . $mk) }}" class="homeModuleCard" data-module="{{ $mk }}" data-module-url="{{ $moduleLinks[$mk]['url'] ?? '' }}" style="--mc-bg:{{ $mc['bg'] }};--mc-accent:{{ $mc['accent'] }};--mc-icon-bg:{{ $mc['icon_bg'] }}">
-                    <div class="homeModuleCard__icon">
-                      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">{!! $moduleIcons[$mk] ?? '' !!}</svg>
-                    </div>
-                    <div class="homeModuleCard__body">
-                      <strong>{{ $moduleLinks[$mk]['label'] ?? ucfirst($mk) }}</strong>
-                      <span>{{ $moduleDesc[$mk] ?? '' }}</span>
-                    </div>
-                    <div class="homeModuleCard__arrow">
-                      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                    </div>
-                  </a>
-                @endforeach
-              </div>
-            </div>
-
             {{-- ── Bottom row: Quick actions + Recent activity ───────────── --}}
             <div class="homeBottom">
               <div class="homePanel">
@@ -453,6 +422,63 @@
                     <div class="homeActivity__skeleton homeActivity__skeleton--sm"></div>
                   </li>
                 </ul>
+              </div>
+            </div>
+
+            {{-- ── Bottom admin monitoring ───────────────────────────────── --}}
+            <div class="homeAdminOps">
+              <div class="homeSection__head">
+                <div>
+                  <h2 class="homeSection__title">Admin Monitoring</h2>
+                  <p class="homeSection__sub">Live service health and recent portal events moved below the daily dashboard.</p>
+                </div>
+                <a href="{{ url('/admin/dashboard') }}" class="homeSection__link" data-native-link="true">
+                  Full Admin Panel
+                  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+              </div>
+
+              <div class="homeOpsGrid">
+                <div class="homePanel homePanel--wide">
+                  <div class="homePanel__head">
+                    <div>
+                      <h3 class="homePanel__title">Service Registry</h3>
+                      <p class="homePanel__sub">Current status for registered modules.</p>
+                    </div>
+                    <button id="hp-refresh-services" type="button" class="homePanel__link homePanel__button">Refresh</button>
+                  </div>
+                  <div class="homeOpsTableWrap">
+                    <table class="homeOpsTable">
+                      <thead>
+                        <tr>
+                          <th>Service</th>
+                          <th>URL</th>
+                          <th>Status</th>
+                          <th>Health</th>
+                        </tr>
+                      </thead>
+                      <tbody id="hp-service-registry">
+                        <tr><td colspan="4" class="homeOpsTable__empty">Loading services...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="homePanel">
+                  <div class="homePanel__head">
+                    <div>
+                      <h3 class="homePanel__title">Recent Events</h3>
+                      <p class="homePanel__sub">Latest ecosystem activity.</p>
+                    </div>
+                    <button id="hp-refresh-events" type="button" class="homePanel__link homePanel__button">Refresh</button>
+                  </div>
+                  <ul class="homeActivity" id="hp-admin-events">
+                    <li class="homeActivity__item homeActivity__item--loading">
+                      <div class="homeActivity__skeleton"></div>
+                      <div class="homeActivity__skeleton homeActivity__skeleton--sm"></div>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
 

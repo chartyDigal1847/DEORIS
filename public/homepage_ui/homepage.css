@@ -2771,6 +2771,132 @@ button {
   100% { background-position: -200% 0; }
 }
 
+/* ── Admin monitoring panels ─────────────────────────────────────────────── */
+.homeAdminOps {
+  margin-top: 20px;
+}
+
+.homeOpsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
+  gap: 14px;
+}
+
+.homePanel--wide {
+  min-width: 0;
+}
+
+.homePanel__sub {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.homePanel__button {
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font: inherit;
+}
+
+.homeOpsTableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.homeOpsTable {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 12px;
+}
+
+.homeOpsTable th {
+  padding: 10px 12px;
+  color: var(--muted);
+  background: #f8f6f1;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.homeOpsTable td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.homeOpsTable td strong,
+.homeOpsTable td span {
+  display: block;
+}
+
+.homeOpsTable td strong {
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.homeOpsTable td span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.homeOpsTable__url {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.homeOpsTable__empty {
+  padding: 18px !important;
+  color: var(--muted) !important;
+  text-align: center;
+}
+
+.homeOpsBadge {
+  display: inline-flex !important;
+  width: max-content;
+  margin: 0 !important;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10.5px !important;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.homeOpsBadge--ok { color: #166534 !important; background: #dcfce7; }
+.homeOpsBadge--info { color: #1d4ed8 !important; background: #dbeafe; }
+.homeOpsBadge--warn { color: #92400e !important; background: #fef3c7; }
+.homeOpsBadge--danger { color: #991b1b !important; background: #fee2e2; }
+.homeOpsBadge--neutral { color: #374151 !important; background: #f3f4f6; }
+
+.homeOpsHealth {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  width: max-content;
+  margin: 0 !important;
+  font-size: 11px !important;
+  font-weight: 700;
+}
+
+.homeOpsHealth span {
+  width: 6px;
+  height: 6px;
+  margin: 0 !important;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.homeOpsHealth.is-ok { color: #16a34a !important; }
+.homeOpsHealth.is-down { color: #dc2626 !important; }
+
 /* ── Feature Cards (3-col for instructor/admission/election) ───────────────── */
 .homeFeatureRow {
   display: grid;
@@ -3161,6 +3287,7 @@ button {
   .homeHero__actions { justify-content: flex-start; }
   .homeStats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .homeBottom { grid-template-columns: 1fr; }
+  .homeOpsGrid { grid-template-columns: 1fr; }
   .homeSingleModule { grid-template-columns: 1fr; }
   .homeFeatureRow { grid-template-columns: 1fr; }
 }
@@ -3710,6 +3837,28 @@ html.portal-nav-open body {
   .dashEmptyState {
     padding: 12px;
     border-radius: 13px;
+  }
+
+  .homeAdminOps {
+    margin-top: 10px;
+  }
+
+  .homeOpsGrid {
+    gap: 8px;
+  }
+
+  .homeOpsTableWrap {
+    border-radius: 10px;
+  }
+
+  .homeOpsTable {
+    min-width: 540px;
+    font-size: 11px;
+  }
+
+  .homeOpsTable th,
+  .homeOpsTable td {
+    padding: 8px 10px;
   }
 
   .homePanel__head,

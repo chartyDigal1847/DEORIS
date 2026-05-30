@@ -567,8 +567,97 @@
       } catch (_) { /* silently ignore */ }
     }
 
+    function statusBadge(status) {
+      const normalized = String(status || "unknown").toLowerCase();
+      const tone = {
+        active: "homeOpsBadge--ok",
+        processed: "homeOpsBadge--ok",
+        inactive: "homeOpsBadge--neutral",
+        received: "homeOpsBadge--info",
+        processing: "homeOpsBadge--warn",
+        degraded: "homeOpsBadge--warn",
+        maintenance: "homeOpsBadge--info",
+        failed: "homeOpsBadge--danger",
+      }[normalized] || "homeOpsBadge--neutral";
+
+      return `<span class="homeOpsBadge ${tone}">${escapeHtml(normalized)}</span>`;
+    }
+
+    async function loadServices() {
+      const body = document.getElementById("hp-service-registry");
+      if (!body) return;
+
+      try {
+        const r = await fetch("/api/v1/services", {
+          headers: portalHeaders(),
+          credentials: "include",
+        });
+        if (!r.ok) return;
+        const { data } = await r.json();
+        const rows = data || [];
+
+        body.innerHTML = rows.length
+          ? rows.map((service) => `
+              <tr>
+                <td>
+                  <strong>${escapeHtml(service.label || service.service_key || "Service")}</strong>
+                  <span>${escapeHtml(service.api_version || "v1")}</span>
+                </td>
+                <td><span class="homeOpsTable__url">${escapeHtml(service.url || "")}</span></td>
+                <td>${statusBadge(service.status)}</td>
+                <td>
+                  <span class="homeOpsHealth ${service.health_ok ? "is-ok" : "is-down"}">
+                    <span></span>${service.health_ok ? "Healthy" : "Unhealthy"}
+                  </span>
+                </td>
+              </tr>
+            `).join("")
+          : `<tr><td colspan="4" class="homeOpsTable__empty">No services registered.</td></tr>`;
+      } catch (_) {
+        body.innerHTML = `<tr><td colspan="4" class="homeOpsTable__empty">Unable to load services.</td></tr>`;
+      }
+    }
+
+    async function loadAdminEvents() {
+      const ul = document.getElementById("hp-admin-events");
+      if (!ul) return;
+
+      try {
+        const r = await fetch("/portal/event-logs?per_page=6", {
+          headers: portalHeaders(),
+          credentials: "include",
+        });
+        if (!r.ok) return;
+        const { data: rows } = await r.json();
+        const list = rows || [];
+        const statusColor = {
+          received: "#3b82f6", processing: "#f59e0b",
+          processed: "#16a34a", failed: "#ef4444",
+        };
+
+        ul.innerHTML = list.length
+          ? list.map((row) => `
+              <li class="homeActivity__item">
+                <span class="homeActivity__dot" style="background:${statusColor[row.status] || "#9ca3af"}"></span>
+                <div class="homeActivity__body">
+                  <strong>${escapeHtml(row.event_name || "Event")}</strong>
+                  <span>${escapeHtml(row.source_module || "")} &middot; ${escapeHtml(row.received_at || "")}</span>
+                </div>
+                <span class="homeActivity__badge homeActivity__badge--${escapeHtml(row.status)}">${escapeHtml(row.status)}</span>
+              </li>`).join("")
+          : `<li class="homeActivity__item"><div class="homeActivity__body"><strong>No recent events</strong><span>Portal activity will appear here.</span></div></li>`;
+      } catch (_) {
+        ul.innerHTML = `<li class="homeActivity__item"><div class="homeActivity__body"><strong>Unable to load events</strong><span>Please refresh this panel.</span></div></li>`;
+      }
+    }
+
+    document.getElementById("hp-refresh-services")?.addEventListener("click", loadServices);
+    document.getElementById("hp-refresh-events")?.addEventListener("click", loadAdminEvents);
+
     loadStats();
     loadActivity();
+    loadServices();
+    loadAdminEvents();
     setInterval(loadStats, 60_000);
 
     // Also refresh when a real-time event comes in via Reverb
@@ -577,6 +666,7 @@
         .listen(".event.processed", () => {
           loadStats();
           loadActivity();
+          loadAdminEvents();
         });
     }
   }
