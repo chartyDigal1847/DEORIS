@@ -60,10 +60,7 @@
       </div>
 
       <div class="nav-mobile-pills" aria-label="Account links">
-        <a href="/login" class="nav-pill nav-pill--login">
-          <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
-          <span>Login</span>
-        </a>
+        <a href="/login" class="nav-pill nav-pill--login">Login</a>
       </div>
 
       <button class="hamburger" id="mobileMenuBtn" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu" type="button">
