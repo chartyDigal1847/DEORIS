@@ -152,6 +152,7 @@ select:focus-visible, textarea:focus-visible {
 }
 .nav-link:hover, .nav-link.active { background: rgba(255,255,255,.12); color: #fff; }
 .nav-mobile-auth { display: none; }
+.nav-mobile-pills { display: none; }
 .nav-actions { display: flex; align-items: center; gap: .6rem; flex-shrink: 0; }
 .btn-ghost-nav {
   padding: 7px 16px; border-radius: var(--r-sm);
@@ -916,8 +917,8 @@ select:focus-visible, textarea:focus-visible {
   }
 
   .nav-inner {
-    padding: 0 1rem;
-    gap: .75rem;
+    padding: 0 4.3rem 0 .85rem;
+    gap: .55rem;
   }
 
   .nav-logo {
@@ -931,6 +932,38 @@ select:focus-visible, textarea:focus-visible {
 
   .nav-brand-sub {
     font-size: .56rem;
+  }
+
+  .nav-mobile-pills {
+    display: flex;
+    align-items: center;
+    gap: .32rem;
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+
+  .nav-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 .58rem;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .nav-pill--login {
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.24);
+    background: rgba(255,255,255,.12);
+  }
+
+  .nav-pill--signup {
+    color: var(--clr-primary-d);
+    background: var(--grad-gold);
   }
 
   .nav-links {
@@ -990,12 +1023,14 @@ select:focus-visible, textarea:focus-visible {
 
   .nav-actions { display: none; }
   .hamburger {
-    position: relative;
+    position: fixed;
+    top: calc((var(--nav-h) - 38px) / 2);
+    right: max(.85rem, env(safe-area-inset-right));
     z-index: 1201;
     display: flex !important;
     width: 38px;
     height: 38px;
-    margin-left: auto;
+    margin-left: 0;
     background: var(--grad-gold);
     border-color: rgba(255,255,255,.45);
     box-shadow: 0 6px 18px rgba(0,0,0,.22);
@@ -1357,6 +1392,12 @@ select:focus-visible, textarea:focus-visible {
     letter-spacing: .04em;
   }
 
+  .nav-pill {
+    min-height: 28px;
+    padding-inline: .48rem;
+    font-size: .62rem;
+  }
+
   .hero-eyebrow span {
     max-width: 240px;
   }
@@ -1408,12 +1449,17 @@ select:focus-visible, textarea:focus-visible {
 
 @media (max-width: 360px) {
   .nav-inner {
-    padding-inline: .75rem;
+    padding-left: .7rem;
+    padding-right: 3.8rem;
   }
 
   .nav-logo {
     width: 30px;
     height: 30px;
+  }
+
+  .nav-pill--signup {
+    display: none;
   }
 
   .hero-title {

@@ -59,6 +59,11 @@
         </a>
       </div>
 
+      <div class="nav-mobile-pills" aria-label="Account links">
+        <a href="/login" class="nav-pill nav-pill--login">Log In</a>
+        <a href="/register" class="nav-pill nav-pill--signup">Sign Up</a>
+      </div>
+
       <button class="hamburger" id="mobileMenuBtn" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu" type="button">
         <span></span><span></span><span></span>
       </button>
