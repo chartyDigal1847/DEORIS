@@ -3141,6 +3141,10 @@ button {
   cursor: pointer;
 }
 
+.sidebarBackdrop[hidden] {
+  display: none !important;
+}
+
 html.portal-nav-open,
 html.portal-nav-open body {
   overflow: hidden;
@@ -3199,7 +3203,7 @@ html.portal-nav-open body {
     --topbar-height: 68px;
   }
 
-  .sidebarBackdrop {
+  .portal.is-sidebar-open .sidebarBackdrop {
     display: block;
   }
 
