@@ -146,7 +146,11 @@ if docker compose exec -T "${SERVICE}" test -f package.json; then
     echo "[setup-module] No package-lock.json; using npm install."
     docker compose exec -T "${SERVICE}" npm install
   fi
-  docker compose exec -T "${SERVICE}" npm run build
+  if docker compose exec -T "${SERVICE}" grep -q '"build"' package.json 2>/dev/null; then
+    docker compose exec -T "${SERVICE}" npm run build
+  else
+    echo "[setup-module] No npm build script; skipping frontend build."
+  fi
 fi
 
 APP_KEY_VALUE="$(read_env_value "${ENV_FILE}" APP_KEY)"
