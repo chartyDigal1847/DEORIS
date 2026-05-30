@@ -418,7 +418,7 @@
       setModuleAreaLoading(false);
       console.log("[portal] Dashboard activated.");
     } else {
-      const frame = moduleFrameFor(moduleName, moduleUrl, { reload: true });
+      const frame = moduleFrameFor(moduleName, moduleUrl);
       hidePanel(dashboardHome);
       hideModuleFrames(frame);
       abortUnfinishedBackgroundFrames(frame);
@@ -460,8 +460,14 @@
       closeNotifications();
       closeMobileSidebar();
       if (activeBeforeClick && item.dataset.module !== "dashboard") {
+        const moduleName = item.dataset.module || "";
+        const activeFrame = moduleFrames.get(moduleName);
+        const isLoading = moduleArea?.classList.contains("moduleArea--loading");
+        if (isLoading || (activeFrame && activeFrame.dataset.loaded !== "true")) {
+          return;
+        }
         const didRestart = restartModuleFrame(
-          item.dataset.module || "",
+          moduleName,
           item.dataset.moduleUrl || ""
         );
         if (didRestart) return;
@@ -506,7 +512,7 @@
       // Module exists but has no nav item (edge case) — activate directly
       navItems.forEach((n) => n.classList.remove("is-active"));
       hidePanel(dashboardHome);
-      const frame = moduleFrameFor(moduleName, moduleUrl, { reload: true });
+      const frame = moduleFrameFor(moduleName, moduleUrl);
       hideModuleFrames(frame);
       abortUnfinishedBackgroundFrames(frame);
       warmModuleOrigin(moduleUrl);
