@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" crossorigin="anonymous">
-  <link rel="stylesheet" href="{{ asset('landing/index.css') }}">
+  <link rel="stylesheet" href="{{ asset('landing/index.css') }}?v={{ filemtime(public_path('landing/index.css')) }}">
 </head>
 <body>
 
@@ -47,6 +47,8 @@
           <li><a href="#features" class="nav-link">Features</a></li>
           <li><a href="#testimonials" class="nav-link">Community</a></li>
           <li><a href="#faq" class="nav-link">FAQ</a></li>
+          <li class="nav-mobile-auth"><a href="/login" class="nav-link nav-link--login">Log In</a></li>
+          <li class="nav-mobile-auth"><a href="/register" class="nav-link nav-link--signup"><i class="fas fa-user-plus" aria-hidden="true"></i> Sign Up</a></li>
         </ul>
       </nav>
 
@@ -506,7 +508,7 @@
   </aside>
 
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js" crossorigin="anonymous"></script>
-  <script src="{{ asset('landing/index.js') }}"></script>
+  <script src="{{ asset('landing/index.js') }}?v={{ filemtime(public_path('landing/index.js')) }}"></script>
   <script>
     window.addEventListener('load', function () {
       var el = document.getElementById('pageLoader');
