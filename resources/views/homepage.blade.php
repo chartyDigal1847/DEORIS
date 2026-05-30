@@ -360,36 +360,6 @@
               </div>
             </div>
 
-            {{-- ── Quick Access (compact module launchers) ───────────────── --}}
-            <div class="homeQuickAccess">
-              <div class="homeQuickAccess__head">
-                <h3 class="homeQuickAccess__title">Quick Access</h3>
-                <p class="homeQuickAccess__sub">Open any module from the dashboard.</p>
-              </div>
-              <div class="homeQuickAccess__list">
-                @foreach ($visibleModules as $mk)
-                  @php
-                    $nav = $allModuleNav[$mk] ?? null;
-                    $moduleUrl = $moduleLinks[$mk]['url'] ?? '';
-                    $label = $moduleLinks[$mk]['label'] ?? ($nav['label'] ?? ucfirst($mk));
-                    $accent = ($moduleColors[$mk] ?? ['accent' => '#374151'])['accent'];
-                  @endphp
-                  @if ($nav && $moduleUrl !== '')
-                    <a href="{{ url('/' . $mk) }}"
-                       class="homeQuickChip"
-                       data-module="{{ $mk }}"
-                       data-module-url="{{ $moduleUrl }}"
-                       style="--qc-accent: {{ $accent }}">
-                      <span class="homeQuickChip__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">{!! $nav['icon'] !!}</svg>
-                      </span>
-                      <span class="homeQuickChip__label">{{ $label }}</span>
-                    </a>
-                  @endif
-                @endforeach
-              </div>
-            </div>
-
             {{-- ── System activity ───────────────────────────────────────── --}}
             <div class="homeBottom homeBottom--single">
               <div class="homePanel">
@@ -421,10 +391,6 @@
                   <h2 class="homeSection__title">Admin Monitoring</h2>
                   <p class="homeSection__sub">Live service health and recent portal events moved below the daily dashboard.</p>
                 </div>
-                <a href="{{ url('/admin/dashboard') }}" class="homeSection__link" data-native-link="true">
-                  Full Admin Panel
-                  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                </a>
               </div>
 
               <div class="homeOpsGrid">
