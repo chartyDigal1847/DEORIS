@@ -48,8 +48,16 @@
 
 /* ── Reset ───────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 100%; scroll-behavior: smooth; }
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  font-size: 100%;
+  scroll-behavior: smooth;
+}
 body {
+  width: 100%;
+  max-width: 100%;
   font-family: var(--font-body); font-size: 15px;
   background: var(--clr-bg); color: var(--clr-text);
   line-height: 1.65; min-height: 100vh;
@@ -917,13 +925,32 @@ select:focus-visible, textarea:focus-visible {
   }
 
   .nav-inner {
-    padding: 0 4.3rem 0 .85rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0 4rem 0 .75rem;
     gap: .55rem;
+  }
+
+  .nav-brand {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  .nav-brand-text {
+    min-width: 0;
+  }
+
+  .nav-brand-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .nav-logo {
     width: 34px;
     height: 34px;
+    flex: 0 0 auto;
   }
 
   .nav-brand-name {
@@ -938,7 +965,7 @@ select:focus-visible, textarea:focus-visible {
     display: flex;
     align-items: center;
     gap: .32rem;
-    margin-left: auto;
+    margin-left: .25rem;
     flex: 0 0 auto;
   }
 
@@ -1025,7 +1052,7 @@ select:focus-visible, textarea:focus-visible {
   .hamburger {
     position: fixed;
     top: calc((var(--nav-h) - 38px) / 2);
-    right: max(.85rem, env(safe-area-inset-right));
+    right: max(.65rem, env(safe-area-inset-right));
     z-index: 1201;
     display: flex !important;
     width: 38px;
@@ -1051,10 +1078,19 @@ select:focus-visible, textarea:focus-visible {
 
   .hero {
     min-height: auto;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
     padding: calc(var(--nav-h) + 1.55rem) 1rem 1.9rem;
   }
 
+  .hero-body {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .hero-eyebrow {
+    max-width: 100%;
     gap: .45rem;
     padding: .32rem .7rem;
     margin-bottom: .8rem;
@@ -1064,6 +1100,7 @@ select:focus-visible, textarea:focus-visible {
   }
 
   .hero-title {
+    max-width: 100%;
     font-size: clamp(1.62rem, 9.6vw, 2.25rem);
     margin-bottom: .65rem;
     line-height: 1.08;
@@ -1097,6 +1134,8 @@ select:focus-visible, textarea:focus-visible {
   }
 
   .hero-stats {
+    width: 100%;
+    max-width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: .45rem;
@@ -1383,19 +1422,24 @@ select:focus-visible, textarea:focus-visible {
 }
 
 @media (max-width: 480px) {
+  .nav-inner {
+    padding-left: .6rem;
+    padding-right: 3.6rem;
+  }
+
   .nav-brand-sub {
     display: none;
   }
 
   .nav-brand-name {
-    font-size: .9rem;
+    font-size: .82rem;
     letter-spacing: .04em;
   }
 
   .nav-pill {
-    min-height: 28px;
-    padding-inline: .48rem;
-    font-size: .62rem;
+    min-height: 27px;
+    padding-inline: .42rem;
+    font-size: .58rem;
   }
 
   .hero-eyebrow span {
@@ -1449,8 +1493,8 @@ select:focus-visible, textarea:focus-visible {
 
 @media (max-width: 360px) {
   .nav-inner {
-    padding-left: .7rem;
-    padding-right: 3.8rem;
+    padding-left: .55rem;
+    padding-right: 3.45rem;
   }
 
   .nav-logo {
