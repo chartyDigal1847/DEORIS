@@ -50,9 +50,11 @@
   if (hamburger && navList) {
     const setOpen = open => {
       navList.classList.toggle('active', open);
+      navbar.classList.toggle('is-menu-open', open);
       hamburger.classList.toggle('open', open);
       hamburger.setAttribute('aria-expanded', open);
       hamburger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      document.body.classList.toggle('nav-menu-open', open);
     };
     hamburger.addEventListener('click', () => setOpen(!navList.classList.contains('active')));
     navList.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
