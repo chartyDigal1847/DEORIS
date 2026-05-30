@@ -177,6 +177,7 @@ fi
 docker compose exec -T "${SERVICE}" php artisan view:cache
 
 echo "[setup-module] Fixing permissions..."
+docker compose exec -T "${SERVICE}" sh -c 'chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true'
 docker compose exec -T "${SERVICE}" sh -c 'chmod -R 775 storage bootstrap/cache 2>/dev/null || true'
 
 docker compose restart nginx "${SERVICE}" >/dev/null
