@@ -1335,8 +1335,8 @@
       </main>
     </div>
 
+    <script src="{{ asset('homepage_ui/portal-bridge.js') }}?v={{ filemtime(public_path('homepage_ui/portal-bridge.js')) }}"></script>
     <script src="{{ asset('homepage_ui/portal-notifications.js') }}?v={{ filemtime(public_path('homepage_ui/portal-notifications.js')) }}"></script>
     <script src="{{ asset('homepage_ui/homepage.js') }}?v={{ filemtime(public_path('homepage_ui/homepage.js')) }}"></script>
-    <script src="{{ asset('homepage_ui/portal-bridge.js') }}?v={{ filemtime(public_path('homepage_ui/portal-bridge.js')) }}"></script>
   </body>
 </html>
