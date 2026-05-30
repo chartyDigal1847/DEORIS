@@ -37,9 +37,13 @@
   const profileDropdown    = document.getElementById("profileDropdown");
   const dashboardHome      = document.getElementById("dashboardHome");
   const moduleFrame        = document.getElementById("moduleFrame");
+  const moduleArea         = document.getElementById("moduleArea");
+  const moduleAreaLoader   = document.getElementById("moduleAreaLoader");
   const moduleFrameHost    = moduleFrame?.parentElement || null;
   const moduleFrames       = new Map();
   const warmedOrigins      = new Set();
+  let activeModuleFrame    = null;
+  let activeRevealToken    = 0;
   const navItems           = Array.from(document.querySelectorAll(".navItem"));
   // Notification elements — owned by portal-notifications.js, referenced
   // here only to close the panel when other UI opens.
@@ -130,6 +134,55 @@
     });
   }
 
+  function setModuleAreaLoading(isLoading) {
+    moduleArea?.classList.toggle("moduleArea--loading", isLoading);
+    if (!moduleAreaLoader) return;
+    if (isLoading) moduleAreaLoader.removeAttribute("hidden");
+    else moduleAreaLoader.setAttribute("hidden", "");
+  }
+
+  function beginModuleReveal(frame) {
+    activeModuleFrame = frame;
+    activeRevealToken += 1;
+    setModuleAreaLoading(true);
+    hidePanel(frame);
+    return activeRevealToken;
+  }
+
+  function completeModuleReveal(frame, token) {
+    if (token !== activeRevealToken || activeModuleFrame !== frame) return;
+    frame.dataset.loaded = "true";
+    setModuleAreaLoading(false);
+    showPanel(frame);
+  }
+
+  function navigateModuleFrame(frame, moduleUrl, { reload = false } = {}) {
+    const baseSrc = buildModuleUrl(moduleUrl);
+    const target = new URL(baseSrc);
+    if (reload) target.searchParams.set("_portal", String(Date.now()));
+    const nextSrc = target.toString();
+    const token = beginModuleReveal(frame);
+
+    const onLoad = () => {
+      if (!frame.src || frame.src === "about:blank") return;
+      frame.removeEventListener("load", onLoad);
+      completeModuleReveal(frame, token);
+    };
+
+    frame.addEventListener("load", onLoad);
+
+    if (!reload && frame.dataset.src === nextSrc && frame.dataset.loaded === "true") {
+      completeModuleReveal(frame, token);
+      return;
+    }
+
+    frame.dataset.src = nextSrc;
+    frame.dataset.moduleUrl = moduleUrl;
+    frame.dataset.loaded = "false";
+    frame.dataset.requestedAt = String(Date.now());
+    frame.src = nextSrc;
+  }
+
   function createModuleFrame(moduleName) {
     const frame =
       !moduleFrame.dataset.module && !moduleFrame.getAttribute("src")
@@ -161,18 +214,9 @@
     return frame;
   }
 
-  function moduleFrameFor(moduleName, moduleUrl) {
-    const src = buildModuleUrl(moduleUrl);
+  function moduleFrameFor(moduleName, moduleUrl, options = {}) {
     const frame = moduleFrames.get(moduleName) || createModuleFrame(moduleName);
-
-    if (frame.dataset.src !== src) {
-      frame.dataset.src = src;
-      frame.dataset.loaded = "false";
-      frame.dataset.requestedAt = String(Date.now());
-      frame.src = src;
-    } else {
-    }
-
+    navigateModuleFrame(frame, moduleUrl, options);
     return frame;
   }
 
@@ -180,14 +224,7 @@
     const frame = moduleFrames.get(moduleName);
     if (!frame) return false;
 
-    const baseSrc = buildModuleUrl(moduleUrl);
-    const reloadSrc = new URL(baseSrc);
-    reloadSrc.searchParams.set("_reload", String(Date.now()));
-
-    frame.dataset.src = reloadSrc.toString();
-    frame.dataset.loaded = "false";
-    frame.dataset.requestedAt = String(Date.now());
-    frame.src = frame.dataset.src;
+    navigateModuleFrame(frame, moduleUrl, { reload: true });
     return true;
   }
 
@@ -378,13 +415,13 @@
     if (isDashboard) {
       showPanel(dashboardHome);
       hideModuleFrames();
+      setModuleAreaLoading(false);
       console.log("[portal] Dashboard activated.");
     } else {
-      const frame = moduleFrameFor(moduleName, moduleUrl);
+      const frame = moduleFrameFor(moduleName, moduleUrl, { reload: true });
       hidePanel(dashboardHome);
       hideModuleFrames(frame);
       abortUnfinishedBackgroundFrames(frame);
-      showPanel(frame);
       warmModuleOrigin(moduleUrl);
       console.log(`[portal] Module "${moduleName}" → ${frame.dataset.src}`);
     }
@@ -407,6 +444,7 @@
       navItems.forEach((n) => n.classList.remove("is-active"));
       showPanel(dashboardHome);
       hideModuleFrames();
+      setModuleAreaLoading(false);
     }
   }
 
@@ -468,10 +506,9 @@
       // Module exists but has no nav item (edge case) — activate directly
       navItems.forEach((n) => n.classList.remove("is-active"));
       hidePanel(dashboardHome);
-      const frame = moduleFrameFor(moduleName, moduleUrl);
+      const frame = moduleFrameFor(moduleName, moduleUrl, { reload: true });
       hideModuleFrames(frame);
       abortUnfinishedBackgroundFrames(frame);
-      showPanel(frame);
       warmModuleOrigin(moduleUrl);
       window.history.pushState({ module: moduleName }, "", `/${moduleName}`);
     }

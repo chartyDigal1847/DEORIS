@@ -171,6 +171,12 @@
       </header>
 
       <main class="moduleArea" id="moduleArea" data-selected-module="{{ $selectedModule }}">
+        <div class="moduleArea__loader" id="moduleAreaLoader" hidden aria-live="polite" aria-busy="true">
+          <div class="moduleArea__loaderCard">
+            <div class="moduleArea__loaderSpinner" aria-hidden="true"></div>
+            <p>Loading module…</p>
+          </div>
+        </div>
         {{-- Flash error from module access denial --}}
         @if (session('error'))
           <div class="flashError" id="flashError" role="alert">

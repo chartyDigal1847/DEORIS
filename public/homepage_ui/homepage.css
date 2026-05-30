@@ -73,6 +73,7 @@ body {
      Use position:fixed-aware sizing so the area fills exactly the remaining
      viewport space without overlapping the fixed sidebar or topbar. */
   position: fixed;
+  isolation: isolate;
   top: var(--topbar-height);
   left: var(--sidebar-width);
   right: 0;
@@ -95,6 +96,51 @@ body {
   height: 100%;
   border: 0;
   background: var(--bg);
+}
+
+.moduleArea--loading .moduleFrame {
+  visibility: hidden;
+}
+
+.moduleArea__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+}
+
+.moduleArea__loader[hidden] {
+  display: none !important;
+}
+
+.moduleArea__loaderCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.moduleArea__loaderSpinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(123, 48, 58, 0.15);
+  border-top-color: var(--burgundy);
+  animation: moduleAreaSpin 0.8s linear infinite;
+}
+
+@keyframes moduleAreaSpin {
+  to { transform: rotate(360deg); }
 }
 
 /* Hidden state — !important so nothing can accidentally un-hide these. */
