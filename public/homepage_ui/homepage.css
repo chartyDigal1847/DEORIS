@@ -3382,6 +3382,95 @@ html.portal-nav-open body {
    COMPACT MOBILE DASHBOARD — natural density after login
 ============================================================================= */
 @media (max-width: 700px) {
+  :root {
+    --topbar-height: 60px;
+  }
+
+  .topbar,
+  .portal.is-collapsed .topbar {
+    height: var(--topbar-height);
+    min-height: var(--topbar-height);
+    gap: 8px;
+    padding: 8px;
+    background: #f3f3f3;
+  }
+
+  .moduleArea,
+  .portal.is-collapsed .moduleArea {
+    top: var(--topbar-height);
+    height: calc(100dvh - var(--topbar-height));
+    min-height: calc(100dvh - var(--topbar-height));
+  }
+
+  .mobileMenu,
+  .iconButton,
+  .profile__button {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+
+  .mobileMenu,
+  .iconButton {
+    color: #2b241d;
+    background: #ffffff;
+  }
+
+  .profile {
+    flex: 0 0 auto;
+  }
+
+  .profile__button {
+    justify-content: center;
+    gap: 0;
+  }
+
+  .profile__text,
+  .profile__chevron {
+    display: none !important;
+  }
+
+  .profile__avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .notificationHost {
+    flex: 0 0 auto;
+  }
+
+  .search {
+    flex: 1 1 auto;
+    min-width: 96px;
+    height: 40px;
+    padding-inline: 10px;
+    border-radius: 12px;
+  }
+
+  .search__icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .search__input {
+    font-size: 16px;
+  }
+
+  .search__input::placeholder {
+    font-size: 12px;
+  }
+
+  .profile__dropdown {
+    position: fixed;
+    top: calc(var(--topbar-height) + 8px);
+    right: 8px;
+    width: min(200px, calc(100vw - 16px));
+  }
+
   .dashboardHome {
     padding: 10px;
   }
@@ -3591,6 +3680,40 @@ html.portal-nav-open body {
 }
 
 @media (max-width: 420px) {
+  :root {
+    --topbar-height: 56px;
+  }
+
+  .topbar,
+  .portal.is-collapsed .topbar {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .mobileMenu,
+  .iconButton,
+  .profile__button {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+  }
+
+  .profile__avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 10.5px;
+  }
+
+  .search {
+    min-width: 0;
+    height: 38px;
+    padding-inline: 9px;
+  }
+
+  .search__input::placeholder {
+    font-size: 11px;
+  }
+
   .dashboardHome {
     padding: 8px;
   }
