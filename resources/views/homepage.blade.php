@@ -45,7 +45,7 @@
       <link rel="dns-prefetch" href="{{ $moduleOrigin }}">
       <link rel="preconnect" href="{{ $moduleOrigin }}" crossorigin>
     @endforeach
-    <link rel="stylesheet" href="{{ asset('homepage_ui/homepage.css') }}">
+    <link rel="stylesheet" href="{{ asset('homepage_ui/homepage.css') }}?v={{ filemtime(public_path('homepage_ui/homepage.css')) }}">
     @vite(['resources/js/app.js'])
   </head>
   <body>
@@ -126,6 +126,8 @@
           @endforeach
         </nav>
       </aside>
+
+      <div class="sidebarBackdrop" id="sidebarBackdrop" hidden aria-hidden="true"></div>
 
       <header class="topbar">
         <button class="mobileMenu" id="openSidebar" type="button" aria-label="Open menu">

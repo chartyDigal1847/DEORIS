@@ -32,6 +32,7 @@
   const sidebar            = document.getElementById("sidebar");
   const collapseBtn        = document.getElementById("collapseSidebar");
   const openSidebarBtn     = document.getElementById("openSidebar");
+  const sidebarBackdrop    = document.getElementById("sidebarBackdrop");
   const profileButton      = document.getElementById("profileButton");
   const profileDropdown    = document.getElementById("profileDropdown");
   const dashboardHome      = document.getElementById("dashboardHome");
@@ -220,14 +221,43 @@
     setCollapsed(!portal.classList.contains("is-collapsed"));
   });
 
+  function isMobileNav() {
+    return window.matchMedia("(max-width: 820px)").matches;
+  }
+
+  function openMobileSidebar() {
+    if (!portal || !isMobileNav()) return;
+    portal.classList.add("is-sidebar-open");
+    document.documentElement.classList.add("portal-nav-open");
+    if (sidebarBackdrop) {
+      sidebarBackdrop.hidden = false;
+      sidebarBackdrop.setAttribute("aria-hidden", "false");
+    }
+    openSidebarBtn?.setAttribute("aria-expanded", "true");
+  }
+
   openSidebarBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
-    portal?.classList.add("is-sidebar-open");
+    openMobileSidebar();
+  });
+
+  sidebarBackdrop?.addEventListener("click", () => {
+    closeMobileSidebar();
   });
 
   function closeMobileSidebar() {
     portal?.classList.remove("is-sidebar-open");
+    document.documentElement.classList.remove("portal-nav-open");
+    if (sidebarBackdrop) {
+      sidebarBackdrop.hidden = true;
+      sidebarBackdrop.setAttribute("aria-hidden", "true");
+    }
+    openSidebarBtn?.setAttribute("aria-expanded", "false");
   }
+
+  window.addEventListener("resize", () => {
+    if (!isMobileNav()) closeMobileSidebar();
+  });
 
   // ── Profile dropdown ─────────────────────────────────────────────────────
 

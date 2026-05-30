@@ -3122,3 +3122,258 @@ button {
   .homeStats { grid-template-columns: 1fr; }
   .homeHero__title { font-size: 22px; }
 }
+
+/* =============================================================================
+   RESPONSIVE ENHANCEMENTS — tablet & phone (desktop layout unchanged above)
+============================================================================= */
+
+.sidebarBackdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: rgba(23, 16, 11, 0.48);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+html.portal-nav-open,
+html.portal-nav-open body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Tablet landscape / small laptop */
+@media (max-width: 1024px) {
+  .dashboardHome {
+    padding: 14px;
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+  }
+
+  .dashHero {
+    padding: 24px 22px;
+    gap: 18px;
+  }
+
+  .dashHero__title {
+    font-size: 26px;
+  }
+
+  .homeHero__inner {
+    gap: 18px;
+  }
+
+  .homeHero__title {
+    font-size: 28px;
+  }
+
+  .homeStats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .homeModuleGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .homeFeatureRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .moduleCardGrid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .profile__button {
+    width: min(200px, 42vw);
+  }
+}
+
+/* Tablet portrait */
+@media (max-width: 820px) {
+  :root {
+    --topbar-height: 68px;
+  }
+
+  .sidebarBackdrop {
+    display: block;
+  }
+
+  .portal.is-sidebar-open .sidebar {
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  }
+
+  .sidebar {
+    padding-top: max(14px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .topbar,
+  .portal.is-collapsed .topbar {
+    height: var(--topbar-height);
+    min-height: var(--topbar-height);
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  .moduleArea,
+  .portal.is-collapsed .moduleArea {
+    top: var(--topbar-height);
+    height: calc(100dvh - var(--topbar-height));
+    min-height: calc(100dvh - var(--topbar-height));
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .moduleFrame {
+    min-height: calc(100dvh - var(--topbar-height));
+  }
+
+  .dashboardHome {
+    padding: 12px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .flashError {
+    margin-inline: 12px;
+    font-size: 12.5px;
+  }
+
+  .navItem {
+    min-height: 44px;
+    padding-block: 11px;
+  }
+
+  .homeHero__meta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .homeHero__actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .homeHero__btn,
+  .homeAction {
+    min-height: 44px;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .homeBottom {
+    gap: 14px;
+  }
+
+  .homePanel {
+    min-width: 0;
+  }
+
+  .searchPanel {
+    max-height: min(60vh, 420px);
+    overflow-y: auto;
+  }
+
+  .notificationHost .notificationPanel {
+    position: fixed;
+    top: calc(var(--topbar-height) + 8px);
+    right: max(10px, env(safe-area-inset-right));
+    left: max(10px, env(safe-area-inset-left));
+    width: auto;
+    max-width: none;
+  }
+}
+
+/* Phone */
+@media (max-width: 560px) {
+  :root {
+    --topbar-height: 64px;
+  }
+
+  .brand__subtitle {
+    font-size: 10px;
+  }
+
+  .search__input {
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+
+  .search__input::placeholder {
+    font-size: 13px;
+  }
+
+  .accountTitle {
+    display: none;
+  }
+
+  .topbar {
+    gap: 8px;
+    padding-inline: 10px;
+  }
+
+  .search {
+    min-width: 0;
+    height: 42px;
+  }
+
+  .homeHero__title {
+    font-size: 24px;
+    line-height: 1.15;
+  }
+
+  .homeHero__sub {
+    font-size: 13px;
+  }
+
+  .homeFeatureCard {
+    padding: 16px;
+  }
+
+  .homeSingleModule__card {
+    padding: 18px;
+  }
+
+  .dashSection__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .moduleCard {
+    padding: 14px;
+  }
+}
+
+/* Small phone */
+@media (max-width: 420px) {
+  .homeHero__actions {
+    flex-direction: column;
+  }
+
+  .homeHero__btn,
+  .homeAction {
+    width: 100%;
+  }
+
+  .homeElectionCard {
+    padding: 14px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .navItem:hover,
+  .homeFeatureCard:hover,
+  .homeModuleCard:hover {
+    transform: none;
+  }
+
+  .navItem:active,
+  .homeFeatureCard:active,
+  .homeModuleCard:active {
+    transform: scale(0.99);
+  }
+}
