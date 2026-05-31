@@ -120,11 +120,16 @@ for PORTAL_ENV_KEY in APP_PORTAL_URL AUTH_SERVICE_URL DEORIS_PORTAL_URL PORTAL_B
   grep -q "^${PORTAL_ENV_KEY}=" "${ENV_FILE}" || echo "${PORTAL_ENV_KEY}=${PORTAL_URL}" >> "${ENV_FILE}"
   sed -i "s#^${PORTAL_ENV_KEY}=.*#${PORTAL_ENV_KEY}=${PORTAL_URL}#" "${ENV_FILE}"
 done
+# Portal HTTP is served by nginx (app is PHP-FPM only). Modules reach the portal API via nginx + Host.
+INTERNAL_PORTAL_BASE="https://nginx"
 for INTERNAL_PORTAL_ENV_KEY in DEORIS_PORTAL_INTERNAL_URL AUTH_SERVICE_INTERNAL_URL; do
-  grep -q "^${INTERNAL_PORTAL_ENV_KEY}=" "${ENV_FILE}" || echo "${INTERNAL_PORTAL_ENV_KEY}=http://app" >> "${ENV_FILE}"
-  sed -i "s#^${INTERNAL_PORTAL_ENV_KEY}=.*#${INTERNAL_PORTAL_ENV_KEY}=http://app#" "${ENV_FILE}"
+  grep -q "^${INTERNAL_PORTAL_ENV_KEY}=" "${ENV_FILE}" || echo "${INTERNAL_PORTAL_ENV_KEY}=${INTERNAL_PORTAL_BASE}" >> "${ENV_FILE}"
+  sed -i "s#^${INTERNAL_PORTAL_ENV_KEY}=.*#${INTERNAL_PORTAL_ENV_KEY}=${INTERNAL_PORTAL_BASE}#" "${ENV_FILE}"
 done
 if [[ "${MODULE_KEY}" == "meditrack" ]]; then
+  PORTAL_HOST="$(echo "${PORTAL_URL}" | sed -E 's#^https?://([^/:]+).*#\1#')"
+  grep -q '^MEDITRACK_PORTAL_EXCHANGE_HOST=' "${ENV_FILE}" || echo "MEDITRACK_PORTAL_EXCHANGE_HOST=${PORTAL_HOST}" >> "${ENV_FILE}"
+  sed -i "s#^MEDITRACK_PORTAL_EXCHANGE_HOST=.*#MEDITRACK_PORTAL_EXCHANGE_HOST=${PORTAL_HOST}#" "${ENV_FILE}"
   grep -q '^LOG_CHANNEL=' "${ENV_FILE}" || echo 'LOG_CHANNEL=stack' >> "${ENV_FILE}"
   sed -i 's/^LOG_CHANNEL=.*/LOG_CHANNEL=stack/' "${ENV_FILE}"
   grep -q '^LOG_STACK=' "${ENV_FILE}" || echo 'LOG_STACK=single,stderr' >> "${ENV_FILE}"
