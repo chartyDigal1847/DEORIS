@@ -130,6 +130,17 @@ chmod +x docker/pull-all.sh docker/setup-module.sh docker/setup-all-modules.sh d
 ./docker/verify-modules.sh
 ```
 
+### Full database reset (destructive)
+
+Wipes all module DBs and the portal DB, then seeds **only** the DEORIS portal (demo users + service registry). Modules are **not** seeded.
+
+```bash
+cd /opt/deoris/DEORIS
+chmod +x docker/reset-all-databases.sh
+./docker/reset-all-databases.sh
+# non-interactive: RESET_CONFIRM=RESET ./docker/reset-all-databases.sh
+```
+
 Deploy order (handled by `setup-all-modules.sh`):
 
 1. `entryEase`

@@ -189,9 +189,13 @@ fi
 echo "[setup-module] Running migrations..."
 docker compose exec -T "${SERVICE}" php artisan migrate --force
 
-if docker compose exec -T "${SERVICE}" php artisan list --raw 2>/dev/null | grep -q '^db:seed'; then
-  echo "[setup-module] Seeding database (if seeders exist)..."
-  docker compose exec -T "${SERVICE}" php artisan db:seed --force || true
+if [[ "${SKIP_MODULE_SEED:-0}" != "1" ]]; then
+  if docker compose exec -T "${SERVICE}" php artisan list --raw 2>/dev/null | grep -q '^db:seed'; then
+    echo "[setup-module] Seeding database (if seeders exist)..."
+    docker compose exec -T "${SERVICE}" php artisan db:seed --force || true
+  fi
+else
+  echo "[setup-module] Skipping module seed (SKIP_MODULE_SEED=1)."
 fi
 
 echo "[setup-module] Caching config/routes/views..."
