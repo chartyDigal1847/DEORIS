@@ -163,6 +163,8 @@ SQL
 fi
 
 if [[ "${MODULE_KEY}" == "enrollease" ]]; then
+  PORTAL_DB="$(read_env_value "${DEORIS_ROOT}/.env" DB_DATABASE)"
+  PORTAL_DB="${PORTAL_DB:-deoris_identity_db}"
   ENTRYEASE_ENV="${DEORIS_ROOT}/../entryEase/.env"
   ENTRYEASE_DB="entryEase_db"
   if [[ -f "${ENTRYEASE_ENV}" ]]; then
@@ -170,12 +172,17 @@ if [[ "${MODULE_KEY}" == "enrollease" ]]; then
     ENTRYEASE_DB="${ENTRYEASE_DB:-entryEase_db}"
   fi
 
-  echo "[setup-module] Granting EnrollEase read access to ${ENTRYEASE_DB} applicant documents..."
+  echo "[setup-module] Granting EnrollEase read access to ${PORTAL_DB} users and ${ENTRYEASE_DB} applicant documents..."
   docker compose exec -T mysql mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" <<SQL
+GRANT SELECT ON \`${PORTAL_DB}\`.* TO '${DB_USERNAME}'@'%';
 GRANT SELECT ON \`${ENTRYEASE_DB}\`.* TO '${DB_USERNAME}'@'%';
 FLUSH PRIVILEGES;
 SQL
 
+  grep -q '^DEORIS_DB_HOST=' "${ENV_FILE}" || echo 'DEORIS_DB_HOST=mysql' >> "${ENV_FILE}"
+  sed -i 's/^DEORIS_DB_HOST=.*/DEORIS_DB_HOST=mysql/' "${ENV_FILE}"
+  grep -q '^DEORIS_DB_DATABASE=' "${ENV_FILE}" || echo "DEORIS_DB_DATABASE=${PORTAL_DB}" >> "${ENV_FILE}"
+  sed -i "s/^DEORIS_DB_DATABASE=.*/DEORIS_DB_DATABASE=${PORTAL_DB}/" "${ENV_FILE}"
   grep -q '^ENTRYEASE_DB_HOST=' "${ENV_FILE}" || echo 'ENTRYEASE_DB_HOST=mysql' >> "${ENV_FILE}"
   sed -i 's/^ENTRYEASE_DB_HOST=.*/ENTRYEASE_DB_HOST=mysql/' "${ENV_FILE}"
   grep -q '^ENTRYEASE_DB_DATABASE=' "${ENV_FILE}" || echo "ENTRYEASE_DB_DATABASE=${ENTRYEASE_DB}" >> "${ENV_FILE}"
