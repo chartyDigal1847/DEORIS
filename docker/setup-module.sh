@@ -41,6 +41,8 @@ if [[ -z "${MYSQL_ROOT_PASSWORD}" ]]; then
   echo "[setup-module] MYSQL_ROOT_PASSWORD missing in DEORIS .env"
   exit 1
 fi
+PORTAL_URL="$(read_env_value .env APP_URL)"
+PORTAL_URL="${PORTAL_URL:-https://deoris.net}"
 
 case "${MODULE_KEY}" in
   entryease)
@@ -114,6 +116,10 @@ sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' "${ENV_FILE}"
 sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' "${ENV_FILE}"
 sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' "${ENV_FILE}"
 sed -i 's/^DEORIS_DB_HOST=.*/DEORIS_DB_HOST=mysql/' "${ENV_FILE}" 2>/dev/null || true
+for PORTAL_ENV_KEY in APP_PORTAL_URL AUTH_SERVICE_URL DEORIS_PORTAL_URL PORTAL_BASE_URL; do
+  grep -q "^${PORTAL_ENV_KEY}=" "${ENV_FILE}" || echo "${PORTAL_ENV_KEY}=${PORTAL_URL}" >> "${ENV_FILE}"
+  sed -i "s#^${PORTAL_ENV_KEY}=.*#${PORTAL_ENV_KEY}=${PORTAL_URL}#" "${ENV_FILE}"
+done
 
 DB_DATABASE="$(read_env_value "${ENV_FILE}" DB_DATABASE)"
 DB_USERNAME="$(read_env_value "${ENV_FILE}" DB_USERNAME)"
