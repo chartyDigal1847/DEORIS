@@ -207,6 +207,7 @@ services:
     container_name: deoris_module_enrollease
     volumes:
       - ../EnrollEase:/var/www
+      - ../entryEase/storage/app/private:/var/deoris/entryease/private:ro
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
 
   module_gradetrack:

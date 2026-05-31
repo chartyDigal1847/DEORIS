@@ -162,6 +162,28 @@ SQL
   sed -i "s/^ENROLLEASE_DB_DATABASE=.*/ENROLLEASE_DB_DATABASE=${ENROLLEASE_DB}/" "${ENV_FILE}"
 fi
 
+if [[ "${MODULE_KEY}" == "enrollease" ]]; then
+  ENTRYEASE_ENV="${DEORIS_ROOT}/../entryEase/.env"
+  ENTRYEASE_DB="entryEase_db"
+  if [[ -f "${ENTRYEASE_ENV}" ]]; then
+    ENTRYEASE_DB="$(read_env_value "${ENTRYEASE_ENV}" DB_DATABASE)"
+    ENTRYEASE_DB="${ENTRYEASE_DB:-entryEase_db}"
+  fi
+
+  echo "[setup-module] Granting EnrollEase read access to ${ENTRYEASE_DB} applicant documents..."
+  docker compose exec -T mysql mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" <<SQL
+GRANT SELECT ON \`${ENTRYEASE_DB}\`.* TO '${DB_USERNAME}'@'%';
+FLUSH PRIVILEGES;
+SQL
+
+  grep -q '^ENTRYEASE_DB_HOST=' "${ENV_FILE}" || echo 'ENTRYEASE_DB_HOST=mysql' >> "${ENV_FILE}"
+  sed -i 's/^ENTRYEASE_DB_HOST=.*/ENTRYEASE_DB_HOST=mysql/' "${ENV_FILE}"
+  grep -q '^ENTRYEASE_DB_DATABASE=' "${ENV_FILE}" || echo "ENTRYEASE_DB_DATABASE=${ENTRYEASE_DB}" >> "${ENV_FILE}"
+  sed -i "s/^ENTRYEASE_DB_DATABASE=.*/ENTRYEASE_DB_DATABASE=${ENTRYEASE_DB}/" "${ENV_FILE}"
+  grep -q '^ENTRYEASE_PRIVATE_STORAGE_PATH=' "${ENV_FILE}" || echo 'ENTRYEASE_PRIVATE_STORAGE_PATH=/var/deoris/entryease/private' >> "${ENV_FILE}"
+  sed -i 's#^ENTRYEASE_PRIVATE_STORAGE_PATH=.*#ENTRYEASE_PRIVATE_STORAGE_PATH=/var/deoris/entryease/private#' "${ENV_FILE}"
+fi
+
 echo "[setup-module] Installing PHP dependencies..."
 docker compose exec -T "${SERVICE}" composer install --no-dev --optimize-autoloader --no-interaction
 
