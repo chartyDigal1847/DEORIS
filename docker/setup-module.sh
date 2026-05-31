@@ -124,6 +124,12 @@ for INTERNAL_PORTAL_ENV_KEY in DEORIS_PORTAL_INTERNAL_URL AUTH_SERVICE_INTERNAL_
   grep -q "^${INTERNAL_PORTAL_ENV_KEY}=" "${ENV_FILE}" || echo "${INTERNAL_PORTAL_ENV_KEY}=http://app" >> "${ENV_FILE}"
   sed -i "s#^${INTERNAL_PORTAL_ENV_KEY}=.*#${INTERNAL_PORTAL_ENV_KEY}=http://app#" "${ENV_FILE}"
 done
+if [[ "${MODULE_KEY}" == "meditrack" ]]; then
+  grep -q '^LOG_CHANNEL=' "${ENV_FILE}" || echo 'LOG_CHANNEL=stack' >> "${ENV_FILE}"
+  sed -i 's/^LOG_CHANNEL=.*/LOG_CHANNEL=stack/' "${ENV_FILE}"
+  grep -q '^LOG_STACK=' "${ENV_FILE}" || echo 'LOG_STACK=single,stderr' >> "${ENV_FILE}"
+  sed -i 's/^LOG_STACK=.*/LOG_STACK=single,stderr/' "${ENV_FILE}"
+fi
 
 DB_DATABASE="$(read_env_value "${ENV_FILE}" DB_DATABASE)"
 DB_USERNAME="$(read_env_value "${ENV_FILE}" DB_USERNAME)"
