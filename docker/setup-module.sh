@@ -144,10 +144,17 @@ if [[ "${MODULE_KEY}" == "assesspay" ]]; then
     ENROLLEASE_DB="$(read_env_value "${ENROLLEASE_ENV}" DB_DATABASE)"
     ENROLLEASE_DB="${ENROLLEASE_DB:-enrollease}"
   fi
+  CLEARCHECK_ENV="${DEORIS_ROOT}/../ClearCheck/.env"
+  CLEARCHECK_SERVICE_KEY="clearcheck-service"
+  if [[ -f "${CLEARCHECK_ENV}" ]]; then
+    CLEARCHECK_SERVICE_KEY="$(read_env_value "${CLEARCHECK_ENV}" CLEARCHECK_SERVICE_KEY)"
+    CLEARCHECK_SERVICE_KEY="${CLEARCHECK_SERVICE_KEY:-clearcheck-service}"
+  fi
 
-  echo "[setup-module] Granting AssessPay read access to ${PORTAL_DB} and ${ENROLLEASE_DB}..."
+  echo "[setup-module] Granting AssessPay read access to ${PORTAL_DB}/${ENROLLEASE_DB} and portal clearance updates..."
   docker compose exec -T mysql mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" <<SQL
 GRANT SELECT ON \`${PORTAL_DB}\`.* TO '${DB_USERNAME}'@'%';
+GRANT UPDATE (\`clearcheck_passed\`, \`updated_at\`) ON \`${PORTAL_DB}\`.\`users\` TO '${DB_USERNAME}'@'%';
 GRANT SELECT ON \`${ENROLLEASE_DB}\`.* TO '${DB_USERNAME}'@'%';
 FLUSH PRIVILEGES;
 SQL
@@ -156,6 +163,8 @@ SQL
   sed -i 's/^DEORIS_DB_HOST=.*/DEORIS_DB_HOST=mysql/' "${ENV_FILE}"
   grep -q '^DEORIS_DB_DATABASE=' "${ENV_FILE}" || echo "DEORIS_DB_DATABASE=${PORTAL_DB}" >> "${ENV_FILE}"
   sed -i "s/^DEORIS_DB_DATABASE=.*/DEORIS_DB_DATABASE=${PORTAL_DB}/" "${ENV_FILE}"
+  grep -q '^CLEARCHECK_SERVICE_KEY=' "${ENV_FILE}" || echo "CLEARCHECK_SERVICE_KEY=${CLEARCHECK_SERVICE_KEY}" >> "${ENV_FILE}"
+  sed -i "s/^CLEARCHECK_SERVICE_KEY=.*/CLEARCHECK_SERVICE_KEY=${CLEARCHECK_SERVICE_KEY}/" "${ENV_FILE}"
   grep -q '^ENROLLEASE_DB_HOST=' "${ENV_FILE}" || echo 'ENROLLEASE_DB_HOST=mysql' >> "${ENV_FILE}"
   sed -i 's/^ENROLLEASE_DB_HOST=.*/ENROLLEASE_DB_HOST=mysql/' "${ENV_FILE}"
   grep -q '^ENROLLEASE_DB_DATABASE=' "${ENV_FILE}" || echo "ENROLLEASE_DB_DATABASE=${ENROLLEASE_DB}" >> "${ENV_FILE}"
